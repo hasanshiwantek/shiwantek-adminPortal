@@ -2,12 +2,13 @@ import React, { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
-import { LogOut, X, Plus } from "lucide-react";
+import { LogOut, X, Plus, UserCircle } from "lucide-react";
 import { useForm } from "react-hook-form"; // ✅ import react-hook-form
 import logo from "../assets/header-logo.svg";
 import { logoutManual } from "../store/authSlice";
 import { createSheetStore } from "../store/usersSlice";
 import { CreateUserModal } from "./CreateUserModal";
+import { SuperAdminProfileModal } from "./SuperAdminProfileModal";
 
 const Header = () => {
   const navigate = useNavigate();
@@ -16,6 +17,7 @@ const Header = () => {
   const { storeloading, error } = useSelector((state) => state.users);
   const [showUserModal, setShowUserModal] = React.useState(false);
   const [showLogoutModal, setShowLogoutModal] = React.useState(false);
+  const [showProfileModal, setShowProfileModal] = React.useState(false);
    const roleId = user?.role_id;
 
   const {
@@ -56,12 +58,23 @@ const Header = () => {
             <span className="font-medium text-gray-800 text-sm">{user?.name || "User"}</span>
             <span className="text-xs text-gray-500">{storeId?.name}</span>
           </div>
-          {[1].includes(roleId) &&  <button
-            onClick={() => navigate("/storeroles")}
-            className="p-2 hover:bg-gray-100 rounded-full transition"
-          >
-            <Plus size={20} className="text-gray-600" />
-          </button>}
+          {[1].includes(roleId) && (
+            <>
+              <button
+                onClick={() => setShowProfileModal(true)}
+                className="p-2 hover:bg-gray-100 rounded-full transition"
+                title="Update profile"
+              >
+                <UserCircle size={20} className="text-gray-600" />
+              </button>
+              <button
+                onClick={() => navigate("/storeroles")}
+                className="p-2 hover:bg-gray-100 rounded-full transition"
+              >
+                <Plus size={20} className="text-gray-600" />
+              </button>
+            </>
+          )}
          
           <button
             onClick={() => setShowLogoutModal(true)}
@@ -73,6 +86,9 @@ const Header = () => {
       </header>
 
       {showUserModal && <CreateUserModal onClose={() => setShowUserModal(false)} />}
+      {showProfileModal && (
+        <SuperAdminProfileModal onClose={() => setShowProfileModal(false)} />
+      )}
 
       {showLogoutModal && (
         <div className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex justify-center items-center z-50">

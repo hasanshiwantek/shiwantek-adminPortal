@@ -1,12 +1,13 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axiosInstance from '../Axios/axiosInstance';
+import { updateUser } from './usersSlice';
 
 const initialState = {
   user: null,
   token: null,
     storeId: null, 
   isAuthenticated: false,
-  loginloading: false,
+  signInLoading: false,
   loading: false,
   error: null,
 };
@@ -71,18 +72,18 @@ const authSlice = createSlice({
     // Login reducers
     builder
       .addCase(login.pending, (state) => {
-        state.loginloading = true;
+        state.signInLoading = true;
         state.error = null;
       })
       .addCase(login.fulfilled, (state, action) => {
-        state.loginloading = false;
+        state.signInLoading = false;
         state.isAuthenticated = true;
         state.user = action.payload.data || action.payload.data?.user;
         state.token = action.payload.token || action.payload.data?.token;
         state.error = null;
       })
       .addCase(login.rejected, (state, action) => {
-        state.loginloading = false;
+        state.signInLoading = false;
         state.isAuthenticated = false;
         state.user = null;
         state.token = null;
@@ -100,15 +101,21 @@ const authSlice = createSlice({
       .addCase(register.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+      // When super admin (or any user) updates own profile, sync auth.user
+      .addCase(updateUser.fulfilled, (state, action) => {
+        const updated = action.payload?.data;
+        if (updated && state.user?.id === updated.id) {
+          state.user = { ...state.user, ...updated };
+        }
       });
   },
 });
 
 export const {
   logoutManual,
-  updateUser,
-    setStoreId,     
-  clearStore,    
+  setStoreId,
+  clearStore,
   clearError,
 } = authSlice.actions;
 

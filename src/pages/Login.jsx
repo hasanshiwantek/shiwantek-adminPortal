@@ -8,7 +8,7 @@ import { login } from "../store/authSlice";
 const Login = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { loginloading, error, isAuthenticated } = useSelector((state) => state.auth);
+  const { signInLoading, error, isAuthenticated } = useSelector((state) => state.auth);
   
   const [showPassword, setShowPassword] = useState(false);
   const {
@@ -115,10 +115,10 @@ const Login = () => {
 
           <button
             type="submit"
-            disabled={loginloading}
+            disabled={signInLoading}
             className="w-full bg-indigo-600 text-white py-2 rounded-lg font-semibold hover:bg-indigo-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loginloading ? "Logging in..." : "Login"}
+            {signInLoading ? "Logging in..." : "Login"}
           </button>
         </form>
       </div>

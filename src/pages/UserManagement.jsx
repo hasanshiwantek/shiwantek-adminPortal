@@ -1,7 +1,9 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchUsers } from "../store/usersSlice";
+import { fetchUsers, deleteUser } from "../store/usersSlice";
 import { CreateUserModal } from "../components/CreateUserModal";
+import addUserIcon from "../assets/adduser-icon.svg?url";
+import { MoreVertical } from "lucide-react";
 
 // Updated UsersSection Component
 const UsersSection = ({

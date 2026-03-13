@@ -247,9 +247,12 @@ const usersSlice = createSlice({
     })
     .addCase(updateUser.fulfilled, (state, action) => {
       state.updateLoading = false;
-      state.users = state.users.map((user) =>
-        user.id === action.payload.id ? action.payload : user
-      );
+      const updated = action.payload?.data;
+      if (updated) {
+        state.users = state.users.map((user) =>
+          user.id === updated.id ? updated : user
+        );
+      }
     })
     .addCase(updateUser.rejected, (state, action) => {
       state.updateLoading = false;
