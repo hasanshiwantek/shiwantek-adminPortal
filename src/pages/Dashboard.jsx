@@ -104,15 +104,15 @@ const staticDashboardData = {
 
 const Dashboard = () => {
   const dispatch = useDispatch();
-  const { users,Orders,  userloading,orderloading, error: usersError } = useSelector((state) => state.users);
-  const { token, user:authUser } = useSelector((state) => state.auth);
+  const { users, Orders, userloading, orderloading, error: usersError } = useSelector((state) => state.users);
+  const { token, user: authUser } = useSelector((state) => state.auth);
   const [data, setData] = useState(staticDashboardData);
   const [loading, setLoading] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const ordersPerPage = 10;
-  
+
 
   const [showDateFilter, setShowDateFilter] = useState(false);
   const [startDate, setStartDate] = useState(null);
@@ -120,35 +120,37 @@ const Dashboard = () => {
   const [userSearch, setUserSearch] = useState("");
   const [showUserModal, setShowUserModal] = useState(false);
   const [hasFetchedUsers, setHasFetchedUsers] = useState(false);
-   const { user ,storeId} = useSelector((state) => state?.auth);
+  const { user, storeId } = useSelector((state) => state?.auth);
   const userAccess = user?.page_access?.page_name
     ? Array.isArray(user.page_access.page_name)
       ? user.page_access.page_name
       : Object.values(user.page_access.page_name) // object → array
     : [];
-  
-  const roleId = user?.role_id;
-// Backend se aaya hua raw data
-// Agar Orders = backend response
-const orderData = Orders?.map(order => ({
-  order_id: order["Order#"],
-  brand: order["Brands"],
-  category: order["Category"],
-  qty: Number(order["Qty"]),
-  price: Number(order["Price"]),
-  status: order["Status"],
-  procured_by: order["Procured By"],
-  order_date: order["Order Date"],
-})) || [];
-const allStatuses = orderData.map(order => order.status);
-// console.log("All statuses:", allStatuses);
 
- 
-  
+  const roleId = user?.role_id;
+  // Backend se aaya hua raw data
+  // Agar Orders = backend response
+  const orderData = Orders?.map(order => ({
+    order_id: order["Order#"],
+    brand: order["Brands"],
+    category: order["Category"],
+    qty: Number(order["Qty"]),
+    price: Number(order["Price"]),
+    grossProfit: Number(order["Gross Profit-4%"]),
+    totalPrice: Number(order["Total Price"]),
+    status: order["Status"],
+    procured_by: order["Procured By"],
+    order_date: order["Order Date"],
+  })) || [];
+  const allStatuses = orderData.map(order => order.status);
+  // console.log("All statuses:", allStatuses);
+
+
+
   const hasAccess = (page) => {
     // Super Admin / Admin
     if (roleId === 1 || roleId === 2) return true;
-  
+
     return userAccess.includes(page);
   };
 
@@ -173,12 +175,12 @@ const allStatuses = orderData.map(order => order.status);
   }, [dispatch, token, hasFetchedUsers]);
   // === Fetch Dashboard Data ===
   useEffect(() => {
-  if(authUser?.role_id === 1 || authUser?.role_id === 2){
-       dispatch(fetchOrdersAdmin(storeId?.sheet_id))
-  }
-  else{
-    dispatch(fetchOrders())
-  }
+    if (authUser?.role_id === 1 || authUser?.role_id === 2) {
+      dispatch(fetchOrdersAdmin(storeId?.sheet_id))
+    }
+    else {
+      dispatch(fetchOrders())
+    }
   }, [authUser?.role_id]);
 
   if (loading)
@@ -187,28 +189,28 @@ const allStatuses = orderData.map(order => order.status);
     return <p className="text-center mt-10 text-red-500">Failed to load data.</p>;
 
   // === Filter logic ===
-const filteredOrders = orderData.filter(order => {
-  const matchStatus =
-    selectedFilter === "All" ||
-    order.status?.toLowerCase() === selectedFilter.toLowerCase();
+  const filteredOrders = orderData.filter(order => {
+    const matchStatus =
+      selectedFilter === "All" ||
+      order.status?.toLowerCase() === selectedFilter.toLowerCase();
 
-  const matchSearch = order.order_id
-    ?.toString()
-    .toLowerCase()
-    .includes(searchQuery.toLowerCase());
+    const matchSearch = order.order_id
+      ?.toString()
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase());
 
-  const orderDate = new Date(order.order_date);
-  const matchDate =
-    (!startDate || orderDate >= startDate) &&
-    (!endDate || orderDate <= endDate);
+    const orderDate = new Date(order.order_date);
+    const matchDate =
+      (!startDate || orderDate >= startDate) &&
+      (!endDate || orderDate <= endDate);
 
-  return matchStatus && matchSearch && matchDate;
-});
+    return matchStatus && matchSearch && matchDate;
+  });
 
-const totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
-const startIndex = (currentPage - 1) * ordersPerPage;
-const endIndex = startIndex + ordersPerPage;
-const currentOrders = filteredOrders.slice(startIndex, endIndex);
+  const totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
+  const startIndex = (currentPage - 1) * ordersPerPage;
+  const endIndex = startIndex + ordersPerPage;
+  const currentOrders = filteredOrders.slice(startIndex, endIndex);
 
 
   // Filter users from Redux (API data only, no static fallback)
@@ -229,28 +231,29 @@ const currentOrders = filteredOrders.slice(startIndex, endIndex);
   }, [users, userSearch, authUser.id]);
 
   // === Stats ===
-const totalOrders = orderData.length; // Total orders
-const orderValue = orderData.reduce((sum, order) => sum + (order.price || 0), 0); // Sum of price
-const grossProfit = orderData.reduce((sum, order) => sum + ((order.price || 0) * 0.2), 0); 
-// Example: assume 20% profit. Replace with real logic if you have
-const deliveredCount = orderData.filter(
-  o => o.status?.toLowerCase() === "completed" // match backend delivered
-).length;
+  const totalOrders = orderData.length; // Total orders
+  const orderValue = orderData.reduce((sum, order) => sum + (order?.totalPrice || 0), 0); // Sum of price
+  const grossProfit = orderData.reduce((sum, order) => sum + ((order?.grossProfit || 0)), 0);
+  // const grossProfit = orderData.reduce((sum, order) => sum + ((order?.grossProfit || 0) * 0.2), 0);
+  // Example: assume 20% profit. Replace with real logic if you have
+  const deliveredCount = orderData.filter(
+    o => o.status?.toLowerCase() === "completed" // match backend delivered
+  ).length;
 
 
   return (
     <>
       {/* ==== Stats Cards ==== */}
-   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-  {[
-    { label: "Total orders", value: totalOrders, icon: totalorders, alt: "Total orders icon" },
-    { label: "Order value", value: `$${orderValue.toLocaleString()}`, icon: ordervalue, alt: "Order value icon" },
-    { label: "Gross profit", value: `$${grossProfit.toLocaleString()}`, icon: grossprofit, alt: "Gross profit icon" },
-    { label: "Orders delivered", value: deliveredCount, icon: totalorders, alt: "Delivered orders icon" },
-  ].map((stat, i) => (
-    <StatsCard key={i} {...stat} />
-  ))}
-</div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+        {[
+          { label: "Total orders", value: totalOrders, icon: totalorders, alt: "Total orders icon" },
+          { label: "Order value", value: `$${orderValue.toLocaleString()}`, icon: ordervalue, alt: "Order value icon" },
+          { label: "Gross profit", value: `$${grossProfit.toLocaleString()}`, icon: grossprofit, alt: "Gross profit icon" },
+          { label: "Orders delivered", value: deliveredCount, icon: totalorders, alt: "Delivered orders icon" },
+        ].map((stat, i) => (
+          <StatsCard key={i} {...stat} />
+        ))}
+      </div>
 
 
       {/* ==== Orders Section ==== */}
@@ -267,11 +270,10 @@ const deliveredCount = orderData.filter(
               (filter) => (
                 <button
                   key={filter}
-                  className={`px-4 py-2 rounded-full text-sm font-medium ${
-                    selectedFilter === filter
-                      ? "bg-indigo-600 text-white"
-                      : "bg-white text-gray-700 border hover:bg-gray-100"
-                  }`}
+                  className={`px-4 py-2 rounded-full text-sm font-medium ${selectedFilter === filter
+                    ? "bg-indigo-600 text-white"
+                    : "bg-white text-gray-700 border hover:bg-gray-100"
+                    }`}
                   onClick={() => {
                     setSelectedFilter(filter);
                     setCurrentPage(1);
@@ -304,33 +306,33 @@ const deliveredCount = orderData.filter(
 
           {/* Orders Grid */}
           {/* ==== Orders Grid (2 cards per row clean layout) ==== */}
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-  {orderloading ? (
-    Array.from({ length: 4 }).map((_, i) => <OrderCardSkeleton key={i} />)
-  ) : hasAccess(selectedFilter) ? (
-    currentOrders.length > 0 ? (
-      currentOrders.map(order => <OrderCard key={order.order_id} order={order} />)
-    ) : (
-      <p className="col-span-full text-center text-gray-500">
-        No orders found for this filter.
-      </p>
-    )
-  ) : (
-    <div className="col-span-full flex justify-center items-center h-40">
-      <NotAllowed />
-    </div>
-  )}
-</div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {orderloading ? (
+              Array.from({ length: 4 }).map((_, i) => <OrderCardSkeleton key={i} />)
+            ) : hasAccess(selectedFilter) ? (
+              currentOrders.length > 0 ? (
+                currentOrders.map(order => <OrderCard key={order.order_id} order={order} />)
+              ) : (
+                <p className="col-span-full text-center text-gray-500">
+                  No orders found for this filter.
+                </p>
+              )
+            ) : (
+              <div className="col-span-full flex justify-center items-center h-40">
+                <NotAllowed />
+              </div>
+            )}
+          </div>
 
 
 
 
           {/* Pagination */}
           <Pagination
-      totalPages={totalPages}
-      currentPage={currentPage}
-      onPageChange={setCurrentPage}
-    />
+            totalPages={totalPages}
+            currentPage={currentPage}
+            onPageChange={setCurrentPage}
+          />
         </div>
 
         {/* === Users Section === */}

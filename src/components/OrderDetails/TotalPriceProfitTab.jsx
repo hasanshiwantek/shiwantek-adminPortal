@@ -38,7 +38,7 @@ const TotalPriceProfitTab = ({ orderData, handleUpdateField }) => {
               <td className="py-3 px-4 relative">
                 <div className="flex items-center gap-2">
                   <span className="font-medium">
-                    ${orderData?.profitTotalPrice || "7257.38"}
+                    ${orderData?.totalPriceValue || "0"}
                   </span>
                   <button
                     onClick={() => setShowTotalPrice(!showTotalPrice)}
@@ -50,11 +50,11 @@ const TotalPriceProfitTab = ({ orderData, handleUpdateField }) => {
                 {showTotalPrice && (
                   <Modal
                     title="Total Price"
-                     options={[
-                       { label: "Price", value: orderData?.totalPricePrice },
-                       { label: "Tax", value: orderData?.totalPriceTax },
-    { label: "Total Price", value: orderData?.profitTotalPrice },
-  ]}
+                    options={[
+                      { label: "Price", value: orderData?.totalPriceValue || 0 },
+                      { label: "Tax", value: orderData?.tax || 0 },
+                      { label: "Total Price", value: orderData?.totalPriceValue + orderData?.tax || 0 },
+                    ]}
                     selected={orderData?.profitTotalPrice}
                     onSelect={(v) => handleUpdateField("totalPriceValue", v)}
                     onClose={() => setShowTotalPrice(false)}
@@ -66,7 +66,7 @@ const TotalPriceProfitTab = ({ orderData, handleUpdateField }) => {
               <td className="py-3 px-4 relative">
                 <div className="flex items-center gap-2">
                   <span className="font-medium">
-                    ${orderData?.totalCost4Percent || "5852.48"}
+                    ${orderData?.totalCost || "0"}
                   </span>
                   <button
                     onClick={() => setShowTotalCost(!showTotalCost)}
@@ -78,11 +78,11 @@ const TotalPriceProfitTab = ({ orderData, handleUpdateField }) => {
                 {showTotalCost && (
                   <Modal
                     title="Total Cost"
-                   options={[
-  { label: "Cost", value: orderData?.totalCostValue },
-  { label: "Vendor Tax", value: orderData?.totalCostVendorTax },
-  { label: "Total Cost (4%)", value: orderData?.totalCost4Percent },
-]}
+                    options={[
+                      { label: "Cost", value: orderData?.totalCost || 0 },
+                      { label: "Vendor Tax", value: orderData?.vendorTax || 0 },
+                      { label: "Total Cost (4%)", value: orderData?.totalCost4Percent || 0 },
+                    ]}
 
                     selected={orderData.totalCost4Percent}
                     onSelect={(v) => handleUpdateField("totalCostValue", v)}
@@ -95,7 +95,7 @@ const TotalPriceProfitTab = ({ orderData, handleUpdateField }) => {
               <td className="py-3 px-4 relative">
                 <div className="flex items-center gap-2">
                   <span className="font-medium">
-                    ${orderData?.totalCostWith4Percent || "6063.24"}
+                    ${orderData?.totalCost4Percent || "0"}
                   </span>
                   <button
                     onClick={() => setShowTotalCostPlus4(!showTotalCostPlus4)}
@@ -107,13 +107,13 @@ const TotalPriceProfitTab = ({ orderData, handleUpdateField }) => {
                 {showTotalCostPlus4 && (
                   <Modal
                     title="Total Cost+4%"
-                 options={[
-  { label: "Total Cost", value: orderData?.grossProfitTotalCost },
-  { label: "CC / PayPal 4%", value: orderData?.ccPaypal4Percent },
-  { label: "Total Cost (with 4%)", value: orderData?.totalCostWith4Percent },
-]}
+                    options={[
+                      { label: "Total Cost", value: orderData?.totalCost },
+                      { label: "CC / PayPal 4%", value: orderData?.ccPaypal },
+                      { label: "Total Cost (with 4%)", value: orderData?.totalCost4Percent },
+                    ]}
 
-                    selected={orderData?.totalCostWith4Percent}
+                    selected={orderData?.totalCost4Percent}
                     onSelect={(v) => handleUpdateField("totalCostPlus4", v)}
                     onClose={() => setShowTotalCostPlus4(false)}
                   />
@@ -124,7 +124,7 @@ const TotalPriceProfitTab = ({ orderData, handleUpdateField }) => {
               <td className="py-3 px-4 relative">
                 <div className="flex items-center gap-2">
                   <span className="font-medium">
-                    ${orderData?.grossProfit || "1404.9"}
+                    ${orderData?.grossProfit || ""}
                   </span>
                   <button
                     onClick={() => setShowGrossProfit(!showGrossProfit)}
@@ -136,11 +136,11 @@ const TotalPriceProfitTab = ({ orderData, handleUpdateField }) => {
                 {showGrossProfit && (
                   <Modal
                     title="Gross Profit"
-              options={[
-  { label: "Total Price", value: orderData?.grossProfitTotalPrice },
-  { label: "Total Cost", value: orderData?.grossProfitTotalCost },
-  { label: "Gross Profit", value: orderData?.grossProfit },
-]}
+                    options={[
+                      { label: "Total Price", value: orderData?.totalPriceValue },
+                      { label: "Total Cost", value: orderData?.totalCost },
+                      { label: "Gross Profit", value: orderData?.grossProfit || 0 },
+                    ]}
 
                     selected={orderData?.grossProfit}
                     onSelect={(v) => handleUpdateField("grossProfit", v)}
@@ -153,7 +153,7 @@ const TotalPriceProfitTab = ({ orderData, handleUpdateField }) => {
               <td className="py-3 px-4 relative">
                 <div className="flex items-center gap-2">
                   <span className="font-medium">
-                    ${orderData?.grossProfitMinus4 || "1194.14"}
+                    ${orderData?.grossProfitMinus4 || ""}
                   </span>
                   <button
                     onClick={() => setShowGrossProfitMinus4(!showGrossProfitMinus4)}
@@ -165,11 +165,11 @@ const TotalPriceProfitTab = ({ orderData, handleUpdateField }) => {
                 {showGrossProfitMinus4 && (
                   <Modal
                     title="Gross Profit-4%"
-options={[
-  { label: "Total Price", value: orderData?.grossProfitMinus4TotalPrice },
-  { label: "Total Cost (+4%)", value: orderData?.grossProfitMinus4TotalCost },
-  { label: "Gross Profit (-4%)", value: orderData?.grossProfitMinus4 },
-]}
+                    options={[
+                      { label: "Total Price", value: orderData?.totalPriceValue },
+                      { label: "Total Cost (+4%)", value: orderData?.totalCost4Percent },
+                      { label: "Gross Profit (-4%)", value: orderData?.grossProfitMinus4 },
+                    ]}
 
                     selected={orderData?.grossProfitMinus4}
                     onSelect={(v) => handleUpdateField("grossProfitMinus4", v)}
@@ -182,7 +182,7 @@ options={[
               <td className="py-3 px-4 relative">
                 <div className="flex items-center gap-2">
                   <span className="font-medium">
-                    {orderData?.profit || "16.45"}%
+                    {orderData?.profit || "0"}
                   </span>
                   <button
                     onClick={() => setShowProfitPercent(!showProfitPercent)}
@@ -194,11 +194,11 @@ options={[
                 {showProfitPercent && (
                   <Modal
                     title="Profit %"
-                  options={[
-  { label: "Total Cost (-4%)", value: orderData?.profitTotalCostMinus4 },
-  { label: "Total Price", value: orderData?.grossProfitTotalPrice },
-  { label: "Profit", value: orderData?.profit },
-]}
+                    options={[
+                      { label: "Total Cost (-4%)", value: orderData?.totalCost4Percent },
+                      { label: "Total Price", value: orderData?.totalPriceValue },
+                      { label: "Profit", value: orderData?.profit },
+                    ]}
 
                     selected={orderData?.profit}
                     onSelect={(v) => handleUpdateField("profitPercent", v)}
@@ -216,13 +216,13 @@ options={[
         <div className="border rounded-xl p-4 bg-gray-50">
           <h4 className="font-semibold text-gray-700 mb-2">Entry check</h4>
           <p className="text-sm text-gray-600">
-            {orderData.entryCheck || "Cx confirm on call that they do not place any order, their card was hacked."}
+            {orderData.entryCheck || ""}
           </p>
         </div>
         <div className="border rounded-xl p-4 bg-gray-50">
           <h4 className="font-semibold text-gray-700 mb-2">Comment</h4>
           <p className="text-sm text-gray-600">
-            {orderData.comment || "We tried to call them, but CX not responded"}
+            {orderData.comment || ""}
           </p>
         </div>
       </div>
@@ -246,7 +246,7 @@ options={[
                     onClick={() => setShowEntryReasonType(!showEntryReasonType)}
                     className="w-full flex items-center justify-between px-3 py-2 border rounded-lg bg-white text-sm text-gray-700 hover:bg-gray-50"
                   >
-                    <span>{orderData?.entryReason || "REV"}</span>
+                    <span>{orderData?.entryReason || "N/A"}</span>
                     {/* <ChevronDown size={16} className="text-gray-400" /> */}
                   </button>
                   {/* {showEntryReasonType && (
