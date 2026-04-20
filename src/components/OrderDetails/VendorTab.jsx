@@ -41,11 +41,11 @@ const VendorTab = ({ orderData }) => {
               <td className="py-3 px-4">
                 {orderData["Paid Via"] ||
                   orderData["Paid via"] ||
-                  orderData.vendorPaidVia ||
+                  orderData.paidVia ||
                   "N/A"}
               </td>
               <td className="py-3 px-4">
-                ${parseFloat(orderData["Cost"] || orderData.vendorCost || 0).toFixed(2)}
+                ${parseFloat(orderData["Cost"] || orderData.cost || 0).toFixed(2)}
               </td>
               <td className="py-3 px-4">
                 ${parseFloat(orderData["Vendor Shipping"] || orderData.vendorShipping || 0).toFixed(2)}
