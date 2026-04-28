@@ -57,7 +57,7 @@ const OrderDetails = () => {
     paidVia: singleOrder.data["Paid Via"],
     ccPaypal: singleOrder.data["CC/Paypal 4%"],
     qty: singleOrder.data["Qty"],
-    price: singleOrder.data["Total Price"],
+    price: singleOrder.data["Price"],
     shipping: singleOrder.data["Shipping"],
     tax: singleOrder.data["Tax"],
     cost: singleOrder.data["Cost"],
@@ -227,7 +227,7 @@ const OrderDetails = () => {
               </button>
             );
           })}
-          <span className="ml-auto text-xs bg-blue-100 text-blue-600 px-3 py-1 rounded-md">
+          <span className="ml-auto text-xs flex justify-center items-center bg-blue-100 text-blue-600 px-3 py-1 rounded-md">
             • {formattedOrder?.status || ""}
           </span>
         </div>

@@ -33,22 +33,21 @@ const OrderCard = ({ order }) => {
               <img src={orderIcon} alt="Order icon" className="w-6 h-6" />
             </div>
             <div>
-             <p
-  className={`text-sm font-semibold flex items-center gap-1 ${
-    hasDash ? "text-red-600" : "text-gray-900"
-  }`}
->
-  #{order.order_id}
-  {hasDash && <AlertTriangle size={14} className="text-red-600" />}
-</p>
+              <p
+                className={`text-sm font-semibold flex items-center gap-1 ${hasDash ? "text-red-600" : "text-gray-900"
+                  }`}
+              >
+                #{order.order_id}
+                {hasDash && <AlertTriangle size={14} className="text-red-600" />}
+              </p>
               <p className="text-xs text-gray-500 uppercase tracking-wide">Order</p>
             </div>
           </div>
-          <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${badgeClass}`}>
+          {order.status && <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${badgeClass}`}>
             <span className="w-2 h-2 rounded-full bg-current" />
-            {order.status || "Pending"}
-        </span>
-      </div>
+            {order.status || ""}
+          </span>}
+        </div>
 
         <div className="grid grid-cols-3 gap-y-4 text-sm text-gray-900">
           <div>
@@ -83,8 +82,8 @@ const OrderCard = ({ order }) => {
           <p className="text-sm text-gray-500">
             Procured by:{" "}
             <span className="font-semibold text-gray-900">{order.procured_by || "N/A"}</span>
-      </p>
-    </div>
+          </p>
+        </div>
       </article>
     </Link>
   );

@@ -192,7 +192,9 @@ const Dashboard = () => {
   const filteredOrders = orderData.filter(order => {
     const matchStatus =
       selectedFilter === "All" ||
-      order.status?.toLowerCase() === selectedFilter.toLowerCase();
+      order.status?.toLowerCase().replace(/\s+/g, "") === selectedFilter.toLowerCase().replace(/\s+/g, "");
+
+    // order.status?.toLowerCase() === selectedFilter.toLowerCase();
 
     const matchSearch = order.order_id
       ?.toString()
@@ -206,7 +208,7 @@ const Dashboard = () => {
 
     return matchStatus && matchSearch && matchDate;
   });
-
+  console.log("Filtered orders:", orderData, filteredOrders, selectedFilter);
   const totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
   const startIndex = (currentPage - 1) * ordersPerPage;
   const endIndex = startIndex + ordersPerPage;
@@ -266,7 +268,7 @@ const Dashboard = () => {
 
           {/* Filters */}
           <div className="flex flex-wrap gap-2 mb-4 w-full">
-            {["All", "Delivered", "Intransit", "Delayed", "Cancel", "Partial", "Refunded"].map(
+            {["All", "Delivered", "Intransit", "Cancel"].map(
               (filter) => (
                 <button
                   key={filter}
