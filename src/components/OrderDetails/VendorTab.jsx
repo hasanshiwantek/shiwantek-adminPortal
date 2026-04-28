@@ -33,7 +33,7 @@ const VendorTab = ({ orderData }) => {
               </td>
               <td className="py-3 px-4">{orderData.status || "N/A"}</td>
               <td className="py-3 px-4">
-                ${((parseFloat(orderData.price) || 0) * 0.04).toFixed(2)}
+                ${((parseFloat(orderData.ccPaypal) || 0)).toFixed(2)}
               </td>
               <td className="py-3 px-4">
                 {orderData["Charged Vendor"] || "Yes"}
