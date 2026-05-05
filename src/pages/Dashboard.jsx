@@ -208,7 +208,6 @@ const Dashboard = () => {
 
     return matchStatus && matchSearch && matchDate;
   });
-  console.log("Filtered orders:", orderData, filteredOrders, selectedFilter);
   const totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
   const startIndex = (currentPage - 1) * ordersPerPage;
   const endIndex = startIndex + ordersPerPage;
@@ -233,15 +232,20 @@ const Dashboard = () => {
   }, [users, userSearch, authUser.id]);
 
   // === Stats ===
-  const totalOrders = orderData.length; // Total orders
-  const orderValue = orderData.reduce((sum, order) => sum + (order?.totalPrice || 0), 0); // Sum of price
-  const grossProfit = orderData.reduce((sum, order) => sum + ((order?.grossProfit || 0)), 0);
-  // const grossProfit = orderData.reduce((sum, order) => sum + ((order?.grossProfit || 0) * 0.2), 0);
-  // Example: assume 20% profit. Replace with real logic if you have
-  const deliveredCount = orderData.filter(
-    o => o.status?.toLowerCase() === "completed" // match backend delivered
+  // const totalOrders = orderData.length; // Total orders
+  // const orderValue = orderData.reduce((sum, order) => sum + (order?.totalPrice || 0), 0); // Sum of price
+  // const grossProfit = orderData.reduce((sum, order) => sum + ((order?.grossProfit || 0)), 0);
+  // // const grossProfit = orderData.reduce((sum, order) => sum + ((order?.grossProfit || 0) * 0.2), 0);
+  // // Example: assume 20% profit. Replace with real logic if you have
+  // const deliveredCount = orderData.filter(
+  //   o => o.status?.toLowerCase() === "completed" // match backend delivered
+  // ).length;
+  const totalOrders = filteredOrders.length;
+  const orderValue = filteredOrders.reduce((sum, order) => sum + (order?.totalPrice || 0), 0);
+  const grossProfit = filteredOrders.reduce((sum, order) => sum + (order?.grossProfit || 0), 0);
+  const deliveredCount = filteredOrders.filter(
+    o => o.status?.toLowerCase() === "delivered"
   ).length;
-
 
   return (
     <>
@@ -268,7 +272,7 @@ const Dashboard = () => {
 
           {/* Filters */}
           <div className="flex flex-wrap gap-2 mb-4 w-full">
-            {["All", "Delivered", "Intransit", "Cancel"].map(
+            {["All", "Delivered", "Intransit"].map(
               (filter) => (
                 <button
                   key={filter}
@@ -290,6 +294,19 @@ const Dashboard = () => {
               className="flex items-center gap-2 bg-white border px-4 py-2 rounded-full text-sm text-gray-700 shadow-sm hover:bg-gray-100"
             >
               <Filter size={16} /> Filter by date
+            </button>
+            <button
+              onClick={() => {
+                setShowDateFilter(false);
+                setStartDate(null);
+                setEndDate(null);
+                setSearchQuery("");
+                setSelectedFilter("All");
+                setCurrentPage(1);
+              }}
+              className="flex items-center gap-2 bg-white border px-4 py-2 rounded-full text-sm text-gray-700 shadow-sm hover:bg-gray-100"
+            >
+              Reset
             </button>
           </div>
 
