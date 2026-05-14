@@ -45,13 +45,13 @@ const VendorTab = ({ orderData }) => {
                   "N/A"}
               </td>
               <td className="py-3 px-4">
-                ${parseFloat(orderData["Cost"] || orderData.cost || 0).toFixed(2)}
+                ${parseFloat(orderData.cost || 0).toFixed(2)}
               </td>
               <td className="py-3 px-4">
-                ${parseFloat(orderData["Vendor Shipping"] || orderData.vendorShipping || 0).toFixed(2)}
+                ${parseFloat(orderData.vendorShipping || 0).toFixed(2)}
               </td>
               <td className="py-3 px-4">
-                ${parseFloat(orderData["Vendor Tax"] || orderData.vendorTax || 0).toFixed(2)}
+                ${parseFloat(orderData.vendorTax || 0).toFixed(2)}
               </td>
             </tr>
           </tbody>
