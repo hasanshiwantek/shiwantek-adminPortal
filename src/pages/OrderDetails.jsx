@@ -63,15 +63,15 @@ const OrderDetails = () => {
     customerEmail: singleOrder.data["Email"],
     customerPhone: singleOrder.data["Phone"],
     paidVia: singleOrder.data["Paid Via"],
-    ccPaypal: singleOrder.data["CC/Paypal 4%"],
+    ccPaypal: toNumber(singleOrder.data["CC/Paypal 4%"]),
     qty: singleOrder.data["Qty"],
     price: toNumber(singleOrder.data["Price"]),
     shipping: toNumber(singleOrder.data["Shipping"]),
     tax: toNumber(singleOrder.data["Tax"]),
-    cost: singleOrder.data["Cost"],
-    vendorShipping: singleOrder.data["Vendor Shipping"],
-    vendorTax: singleOrder.data["Vendor Tax"],
-    totalPriceValue: singleOrder.data["Total Price"],
+    cost: toNumber(singleOrder.data["Cost"]),
+    vendorShipping: toNumber(singleOrder.data["Vendor Shipping"]),
+    vendorTax: toNumber(singleOrder.data["Vendor Tax"]),
+    totalPriceValue: toNumber(singleOrder.data["Total Price"]),
     vendor: singleOrder.data["Vendor"],
     vendorOrder: singleOrder.data["Vendor order"],
     vendorPart: singleOrder.data["Vendor Part"],
@@ -84,23 +84,23 @@ const OrderDetails = () => {
     totalPrice: singleOrder.total_price?.total_price,
     totalPricePrice: singleOrder.total_price?.price,
     totalPriceTax: singleOrder.total_price?.tax,
-    totalCost: singleOrder.data["Total Cost"],
+    totalCost: toNumber(singleOrder.data["Total Cost"]),
     // totalCost: singleOrder.total_cost?.total_cost,
 
     totalCostValue: singleOrder.total_cost?.Cost,
     totalCostVendorTax: singleOrder.total_cost?.["Vendor Tax"],
 
     totalCostWith4Percent: singleOrder["total_cost + 4%"]?.total_cost_4,
-    totalCost4Percent: singleOrder?.data["Total Cost+4%"],
+    totalCost4Percent: toNumber(singleOrder?.data["Total Cost+4%"]),
     // totalCost4Percent: singleOrder?.data["Gross Profit"],
     // totalCost4Percent: singleOrder["total_cost + 4%"]?.total_Cost,
     ccPaypal4Percent: singleOrder["total_cost + 4%"]?.["CC/Paypal 4%"],
 
-    grossProfit: singleOrder?.data["Gross Profit"],
+    grossProfit: toNumber(singleOrder?.data["Gross Profit"]),
     grossProfitTotalPrice: singleOrder.gross_profit?.total_price,
     grossProfitTotalCost: singleOrder.gross_profit?.total_cost,
 
-    grossProfitMinus4: singleOrder?.data["Gross Profit-4%"],
+    grossProfitMinus4: toNumber(singleOrder?.data["Gross Profit-4%"]),
     grossProfitMinus4TotalPrice: singleOrder["gross_profit - 4%"]?.total_price,
     grossProfitMinus4TotalCost: singleOrder["gross_profit - 4%"]?.["total_cost+4%"],
 
@@ -127,19 +127,33 @@ const OrderDetails = () => {
       dispatch(fetchSingleOrder(orderId))
     }
   }, [authUser?.role_id, dispatch, orderId]);
+  // useEffect(() => {
+  //   const firstAccessible = tabs.find((tab) => {
+  //     const tabKey = tab.path === "total-price-profit" ? "Total price & Profit" : tab.label;
+  //     return hasAccess(tabKey);
+  //   });
+  //   if (firstAccessible) {
+  //     const key = firstAccessible.path === "total-price-profit" ? "total price & profit" : firstAccessible.path;
+  //     setActiveTab(key);
+  //   }
+  // }, [userAccess]);
+  // const hasAccess = (page) => {
+  //   if (roleId === 1 || roleId === 2) return true;
+  //   return userAccess.includes(page.toLowerCase());
+  //   // return userAccess.some(
+  //   //   (access) => access.toLowerCase() === page.toLowerCase()
+  //   // );
+  // };
   useEffect(() => {
-    const firstAccessible = tabs.find((tab) => {
-      const tabKey = tab.path === "total-price-profit" ? "Total price & Profit" : tab.label;
-      return hasAccess(tabKey);
-    });
-    if (firstAccessible) {
+    const firstAccessible = tabs.find((tab) => hasAccess(tab.label));
+    if (firstAccessible && userAccess.length) {
       const key = firstAccessible.path === "total-price-profit" ? "total price & profit" : firstAccessible.path;
       setActiveTab(key);
     }
   }, [userAccess]);
   const hasAccess = (page) => {
     if (roleId === 1 || roleId === 2) return true;
-    // return userAccess.includes(page);
+    if (!userAccess || userAccess.length === 0) return true;
     return userAccess.some(
       (access) => access.toLowerCase() === page.toLowerCase()
     );
@@ -227,9 +241,10 @@ const OrderDetails = () => {
       <div className="bg-white p-6 rounded-2xl shadow-sm">
         <div className="flex gap-3 mb-6">
           {tabs.map((tab) => {
+            if (!hasAccess(tab.label)) return null;
             const tabKey = tab.path === "total-price-profit" ? "total price & profit" : tab.path;
+            console.log(tab);
 
-            if (!hasAccess(tabKey)) return null;
             return (
               <button
                 key={tab.path}
