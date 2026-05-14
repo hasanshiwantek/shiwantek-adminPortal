@@ -20,24 +20,24 @@ const pageAccessOptions = [
 // Helper function to convert page_name array to pageAccess object
 const convertPageNamesToPageAccess = (pageNames) => {
   if (!pageNames || !Array.isArray(pageNames)) return {};
-  
+
   const pageAccess = {};
-  
+
   pageAccessOptions.forEach(option => {
-    const matchingTabs = option.tabs.filter(tab => 
+    const matchingTabs = option.tabs.filter(tab =>
       pageNames.some(name => name.toLowerCase() === tab.toLowerCase())
     );
-    
+
     if (matchingTabs.length > 0) {
       pageAccess[option.page] = matchingTabs;
     }
   });
-  
+
   return pageAccess;
 };
 
 // Updated CreateUserModal with Edit Support
-export  const CreateUserModal = ({ onClose, editUser = null }) => {
+export const CreateUserModal = ({ onClose, editUser = null }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [expandedPages, setExpandedPages] = useState({});
@@ -51,12 +51,12 @@ export  const CreateUserModal = ({ onClose, editUser = null }) => {
   // Initialize form with edit data if available
   const getInitialPageAccess = () => {
     if (!editUser) return {};
-    
+
     // Check if page_access is an object with page_name array
     if (editUser.page_access?.page_name) {
       return convertPageNamesToPageAccess(editUser.page_access.page_name);
     }
-    
+
     // Fallback if it's already in the correct format
     return editUser.page_access || {};
   };
@@ -66,19 +66,13 @@ export  const CreateUserModal = ({ onClose, editUser = null }) => {
     email: editUser?.email || "",
     password: "",
     confirmPassword: "",
-    role: editUser?.role_id?.toString() || "2",
+    role: editUser?.role_id?.toString(),
     pageAccess: getInitialPageAccess(),
   });
   const [errors, setErrors] = useState({});
 
   // Debug: Log the converted page access
-  useEffect(() => {
-    if (editUser) {
-      console.log("Edit User:", editUser);
-      console.log("Page Access from API:", editUser.page_access);
-      console.log("Converted Page Access:", getInitialPageAccess());
-    }
-  }, [editUser]);
+  
 
   const validateForm = () => {
     const newErrors = {};
@@ -89,7 +83,7 @@ export  const CreateUserModal = ({ onClose, editUser = null }) => {
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       newErrors.email = "Enter a valid email";
     }
-    
+
     // Password validation only for create mode or if password is entered in edit mode
     if (!isEditMode) {
       if (!formData.password) {
@@ -153,11 +147,11 @@ export  const CreateUserModal = ({ onClose, editUser = null }) => {
 
       const result = await dispatch(updateUser({ id: editUser.id, data: payload }));
 
-  if (updateUser.fulfilled.match(result)) {
-  onClose();
-} else {
-  toast.error("Failed to update user. Please try again."); // ❌ error toast
-}
+      if (updateUser.fulfilled.match(result)) {
+        onClose();
+      } else {
+        toast.error("Failed to update user. Please try again."); // ❌ error toast
+      }
     } else {
       // Create user
       const payload = {
@@ -225,6 +219,10 @@ export  const CreateUserModal = ({ onClose, editUser = null }) => {
     return tabs.every(tab => currentTabs.includes(tab));
   };
 
+
+  console.log("formData", formData);
+
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex justify-center items-center z-50 p-4">
       <div className="bg-white w-full max-w-2xl rounded-2xl p-6 shadow-lg relative max-h-[90vh] overflow-y-auto">
@@ -239,8 +237,8 @@ export  const CreateUserModal = ({ onClose, editUser = null }) => {
           {isEditMode ? "Edit user" : "Create new user"}
         </h2>
         <p className="text-sm text-gray-500 mb-6">
-          {isEditMode 
-            ? "Update the user details below." 
+          {isEditMode
+            ? "Update the user details below."
             : "Fill in the details below to create a new user account."}
         </p>
 
@@ -253,9 +251,8 @@ export  const CreateUserModal = ({ onClose, editUser = null }) => {
                 placeholder="e.g. John Doe"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className={`w-full mt-1 p-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500 ${
-                  errors.name ? "border-red-400" : "border-gray-200"
-                }`}
+                className={`w-full mt-1 p-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500 ${errors.name ? "border-red-400" : "border-gray-200"
+                  }`}
               />
               <p className="text-xs text-red-500 min-h-[16px] mt-1">
                 {errors.name || " "}
@@ -269,9 +266,8 @@ export  const CreateUserModal = ({ onClose, editUser = null }) => {
                 placeholder="e.g. example@gmail.com"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className={`w-full mt-1 p-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500 ${
-                  errors.email ? "border-red-400" : "border-gray-200"
-                }`}
+                className={`w-full mt-1 p-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500 ${errors.email ? "border-red-400" : "border-gray-200"
+                  }`}
               />
               <p className="text-xs text-red-500 min-h-[16px] mt-1">
                 {errors.email || " "}
@@ -290,9 +286,8 @@ export  const CreateUserModal = ({ onClose, editUser = null }) => {
                   placeholder={isEditMode ? "Leave blank to keep current" : "Enter secure password"}
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className={`w-full mt-1 p-2 pr-10 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500 ${
-                    errors.password ? "border-red-400" : "border-gray-200"
-                  }`}
+                  className={`w-full mt-1 p-2 pr-10 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500 ${errors.password ? "border-red-400" : "border-gray-200"
+                    }`}
                 />
                 <button
                   type="button"
@@ -317,9 +312,8 @@ export  const CreateUserModal = ({ onClose, editUser = null }) => {
                   placeholder="Re-enter password"
                   value={formData.confirmPassword}
                   onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                  className={`w-full mt-1 p-2 pr-10 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500 ${
-                    errors.confirmPassword ? "border-red-400" : "border-gray-200"
-                  }`}
+                  className={`w-full mt-1 p-2 pr-10 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500 ${errors.confirmPassword ? "border-red-400" : "border-gray-200"
+                    }`}
                 />
                 <button
                   type="button"
@@ -340,15 +334,36 @@ export  const CreateUserModal = ({ onClose, editUser = null }) => {
               <label className="text-sm text-gray-600 font-medium">
                 Select role
               </label>
-              <select
+              {/* <select
                 value={formData.role}
-                onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                className={`w-full mt-1 p-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500 ${
-                  errors.role ? "border-red-400" : "border-gray-200"
-                }`}
+                // onChange={(e) => console.log(e.target)
+                // }
+                onChange={(e) => {
+                  console.log("selected:", e.target.value);
+                  setFormData({ ...formData, role: e.target.value });
+                }}
+                className={`w-full mt-1 p-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500 ${errors.role ? "border-red-400" : "border-gray-200"
+                  }`}
               >
                 {roles?.map((role) => (
-                  <option key={role.id} value={role.id}>
+                  <option key={role.id} value={role.id.toString()}>
+                    {role.name}
+                  </option>
+                ))}
+              </select> */
+              }
+              <select
+                value={formData.role}
+                onChange={(e) => {
+                  console.log("selected:", e.target.value);
+                  setFormData({ ...formData, role: e.target.value });
+                }}
+                className={`w-full mt-1 p-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500 ${errors.role ? "border-red-400" : "border-gray-200"
+                  }`}
+              >
+                <option value="">Select a role</option>
+                {roles?.map((role) => (
+                  <option key={role.id} value={role.id.toString()}>
                     {role.name}
                   </option>
                 ))}
@@ -376,9 +391,8 @@ export  const CreateUserModal = ({ onClose, editUser = null }) => {
                     className={`${index !== 0 ? "border-t border-gray-200" : ""}`}
                   >
                     <div
-                      className={`flex items-center justify-between p-3 cursor-pointer hover:bg-gray-50 ${
-                        selected ? "bg-indigo-50" : ""
-                      }`}
+                      className={`flex items-center justify-between p-3 cursor-pointer hover:bg-gray-50 ${selected ? "bg-indigo-50" : ""
+                        }`}
                       onClick={() => togglePageExpansion(item.page)}
                     >
                       <div className="flex items-center gap-2">
@@ -415,11 +429,10 @@ export  const CreateUserModal = ({ onClose, editUser = null }) => {
                             return (
                               <label
                                 key={tab}
-                                className={`text-xs px-3 py-1.5 rounded-lg border cursor-pointer transition ${
-                                  isTabSelected
-                                    ? "bg-indigo-600 text-white border-indigo-600"
-                                    : "text-gray-700 border-gray-300 hover:bg-white"
-                                }`}
+                                className={`text-xs px-3 py-1.5 rounded-lg border cursor-pointer transition ${isTabSelected
+                                  ? "bg-indigo-600 text-white border-indigo-600"
+                                  : "text-gray-700 border-gray-300 hover:bg-white"
+                                  }`}
                               >
                                 <input
                                   type="checkbox"

@@ -14,6 +14,7 @@ import { fetchOrders, fetchOrdersAdmin, fetchUsers } from "../store/usersSlice";
 import NotAllowed from "../components/notallowed/NotAllowed";
 import Pagination from "../components/Pagination";
 import { OrderCardSkeleton } from "../components/Utils";
+import { toNumber } from "../utils/constant";
 
 const staticDashboardData = {
   order_value: 235000,
@@ -113,7 +114,8 @@ const Dashboard = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const ordersPerPage = 10;
 
-
+  const [selectedAgent, setSelectedAgent] = useState("All");
+  const [selectedProcuredBy, setSelectedProcuredBy] = useState("All");
   const [showDateFilter, setShowDateFilter] = useState(false);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
@@ -121,6 +123,7 @@ const Dashboard = () => {
   const [showUserModal, setShowUserModal] = useState(false);
   const [hasFetchedUsers, setHasFetchedUsers] = useState(false);
   const { user, storeId } = useSelector((state) => state?.auth);
+
   const userAccess = user?.page_access?.page_name
     ? Array.isArray(user.page_access.page_name)
       ? user.page_access.page_name
@@ -134,19 +137,24 @@ const Dashboard = () => {
     order_id: order["Order#"],
     brand: order["Brands"],
     category: order["Category"],
-    qty: Number(order["Qty"]),
-    price: Number(order["Price"]),
-    grossProfit: Number(order["Gross Profit-4%"]),
-    totalPrice: Number(order["Total Price"]),
+    qty: Number(toNumber(order["Qty"])),
+    price: Number(toNumber(order["Price"])),
+    grossProfit: Number(toNumber(order["Gross Profit-4%"])),
+    totalPrice: Number(toNumber(order["Total Price"])),
     status: order["Status"],
     procured_by: order["Procured By"],
     order_date: order["Order Date"],
+    sales_agent: order["Sales Agent"],
   })) || [];
   const allStatuses = orderData.map(order => order.status);
   // console.log("All statuses:", allStatuses);
 
 
+  const salesAgents = [...new Set(orderData.map(o => o?.sales_agent).filter(Boolean))];
+  // ["PPC", "Frank", "Emma", "Mike"]
 
+  const procuredByList = [...new Set(orderData.map(o => o?.procured_by).filter(Boolean))];
+  // ["Bill Dawson", "Mike"]
   const hasAccess = (page) => {
     // Super Admin / Admin
     if (roleId === 1 || roleId === 2) return true;
@@ -189,12 +197,29 @@ const Dashboard = () => {
     return <p className="text-center mt-10 text-red-500">Failed to load data.</p>;
 
   // === Filter logic ===
+  // const filteredOrders = orderData.filter(order => {
+  //   const matchStatus =
+  //     selectedFilter === "All" ||
+  //     order.status?.toLowerCase().replace(/\s+/g, "") === selectedFilter.toLowerCase().replace(/\s+/g, "");
+
+  //   // order.status?.toLowerCase() === selectedFilter.toLowerCase();
+
+  //   const matchSearch = order.order_id
+  //     ?.toString()
+  //     .toLowerCase()
+  //     .includes(searchQuery.toLowerCase());
+
+  //   const orderDate = new Date(order.order_date);
+  //   const matchDate =
+  //     (!startDate || orderDate >= startDate) &&
+  //     (!endDate || orderDate <= endDate);
+
+  //   return matchStatus && matchSearch && matchDate;
+  // });
   const filteredOrders = orderData.filter(order => {
     const matchStatus =
       selectedFilter === "All" ||
       order.status?.toLowerCase().replace(/\s+/g, "") === selectedFilter.toLowerCase().replace(/\s+/g, "");
-
-    // order.status?.toLowerCase() === selectedFilter.toLowerCase();
 
     const matchSearch = order.order_id
       ?.toString()
@@ -206,8 +231,15 @@ const Dashboard = () => {
       (!startDate || orderDate >= startDate) &&
       (!endDate || orderDate <= endDate);
 
-    return matchStatus && matchSearch && matchDate;
+    const matchAgent =
+      selectedAgent === "All" || order.sales_agent === selectedAgent;
+
+    const matchProcuredBy =
+      selectedProcuredBy === "All" || order.procured_by === selectedProcuredBy;
+
+    return matchStatus && matchSearch && matchDate && matchAgent && matchProcuredBy;
   });
+
   const totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
   const startIndex = (currentPage - 1) * ordersPerPage;
   const endIndex = startIndex + ordersPerPage;
@@ -240,6 +272,8 @@ const Dashboard = () => {
   // const deliveredCount = orderData.filter(
   //   o => o.status?.toLowerCase() === "completed" // match backend delivered
   // ).length;
+
+
   const totalOrders = filteredOrders.length;
   const orderValue = filteredOrders.reduce((sum, order) => sum + (order?.totalPrice || 0), 0);
   const grossProfit = filteredOrders.reduce((sum, order) => sum + (order?.grossProfit || 0), 0);
@@ -265,7 +299,9 @@ const Dashboard = () => {
       {/* ==== Orders Section ==== */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* === Orders List === */}
-        <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        {/* <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-6"> */}
+        <div className={`${[1, 2].includes(roleId) ? "lg:col-span-2" : "lg:col-span-3"} bg-white rounded-2xl shadow-sm border border-gray-100 p-6`}>
+
           <div className="mb-4">
             <h2 className="font-semibold text-gray-800 text-lg">Orders</h2>
           </div>
@@ -289,6 +325,38 @@ const Dashboard = () => {
                 </button>
               )
             )}
+            {/* Sales Agent Dropdown */}
+            <select
+              value={selectedAgent}
+              onChange={(e) => {
+                setSelectedAgent(e.target.value);
+                setCurrentPage(1);
+                setSelectedProcuredBy("All");
+              }}
+              className="px-4 py-2 rounded-full text-sm font-medium bg-white text-gray-700 border shadow-sm hover:bg-gray-100 outline-none cursor-pointer"
+            >
+              <option value="All">All Agents</option>
+              {salesAgents.map((agent) => (
+                <option key={agent} value={agent}>{agent}</option>
+              ))}
+            </select>
+
+            {/* Procured By Dropdown */}
+            <select
+              value={selectedProcuredBy}
+              onChange={(e) => {
+                setSelectedProcuredBy(e.target.value);
+                setSelectedAgent("All");
+                setCurrentPage(1);
+              }}
+              className="px-4 py-2 rounded-full text-sm font-medium bg-white text-gray-700 border shadow-sm hover:bg-gray-100 outline-none cursor-pointer"
+            >
+              <option value="All">All Procured By</option>
+              {procuredByList.map((name) => (
+                <option key={name} value={name}>{name}</option>
+              ))}
+            </select>
+
             <button
               onClick={() => setShowDateFilter(true)}
               className="flex items-center gap-2 bg-white border px-4 py-2 rounded-full text-sm text-gray-700 shadow-sm hover:bg-gray-100"
@@ -302,6 +370,8 @@ const Dashboard = () => {
                 setEndDate(null);
                 setSearchQuery("");
                 setSelectedFilter("All");
+                setSelectedAgent("All");
+                setSelectedProcuredBy("All");
                 setCurrentPage(1);
               }}
               className="flex items-center gap-2 bg-white border px-4 py-2 rounded-full text-sm text-gray-700 shadow-sm hover:bg-gray-100"
@@ -355,7 +425,7 @@ const Dashboard = () => {
         </div>
 
         {/* === Users Section === */}
-        <div>
+        {[1, 2].includes(roleId) && <div>
           <UsersSection
             users={filteredUsers}
             searchValue={userSearch}
@@ -364,7 +434,7 @@ const Dashboard = () => {
             loading={userloading || (!hasFetchedUsers && token)}
             error={usersError}
           />
-        </div>
+        </div>}
       </div>
 
       {/* ==== Date Filter Modal ==== */}

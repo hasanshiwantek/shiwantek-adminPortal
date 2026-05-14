@@ -10,6 +10,7 @@ import { useDispatch, useSelector } from "react-redux";
 import NotAllowed from "../components/notallowed/NotAllowed";
 import { fetchSingleOrder, fetchSingleOrderAdmin } from "../store/usersSlice";
 import { AlertTriangle } from "lucide-react";
+import { toNumber } from "../utils/constant";
 
 const OrderDetails = () => {
   const dispatch = useDispatch();
@@ -17,6 +18,13 @@ const OrderDetails = () => {
   const { id } = useParams();
   const orderId = id;
 
+  const tabs = [
+    { label: "Order", path: "order" },
+    { label: "Invoice", path: "invoice" },
+    { label: "Customer", path: "customer" },
+    { label: "Vendor", path: "vendor" },
+    { label: "Total price & Profit", path: "total-price-profit" },
+  ];
   const { singleOrder, orderloading, error: usersError } = useSelector((state) => state.users);
   const { storeId, user: authUser } = useSelector((state) => state.auth);
   const { user } = useSelector((state) => state?.auth);
@@ -57,9 +65,9 @@ const OrderDetails = () => {
     paidVia: singleOrder.data["Paid Via"],
     ccPaypal: singleOrder.data["CC/Paypal 4%"],
     qty: singleOrder.data["Qty"],
-    price: singleOrder.data["Price"],
-    shipping: singleOrder.data["Shipping"],
-    tax: singleOrder.data["Tax"],
+    price: toNumber(singleOrder.data["Price"]),
+    shipping: toNumber(singleOrder.data["Shipping"]),
+    tax: toNumber(singleOrder.data["Tax"]),
     cost: singleOrder.data["Cost"],
     vendorShipping: singleOrder.data["Vendor Shipping"],
     vendorTax: singleOrder.data["Vendor Tax"],
@@ -108,6 +116,7 @@ const OrderDetails = () => {
     : [];
 
   const roleId = user?.role_id;
+  const pageAccess = user
 
   // Fetch order on mount
   useEffect(() => {
@@ -115,13 +124,25 @@ const OrderDetails = () => {
       dispatch(fetchSingleOrderAdmin({ orderId: orderId, sheetId: storeId?.sheet_id }));
     }
     else {
-      dispatch(fetchSingleOrder())
+      dispatch(fetchSingleOrder(orderId))
     }
   }, [authUser?.role_id, dispatch, orderId]);
-
+  useEffect(() => {
+    const firstAccessible = tabs.find((tab) => {
+      const tabKey = tab.path === "total-price-profit" ? "Total price & Profit" : tab.label;
+      return hasAccess(tabKey);
+    });
+    if (firstAccessible) {
+      const key = firstAccessible.path === "total-price-profit" ? "total price & profit" : firstAccessible.path;
+      setActiveTab(key);
+    }
+  }, [userAccess]);
   const hasAccess = (page) => {
     if (roleId === 1 || roleId === 2) return true;
-    return userAccess.includes(page);
+    // return userAccess.includes(page);
+    return userAccess.some(
+      (access) => access.toLowerCase() === page.toLowerCase()
+    );
   };
 
   // Handle field update
@@ -166,13 +187,6 @@ const OrderDetails = () => {
     );
   }
 
-  const tabs = [
-    { label: "Order", path: "order" },
-    { label: "Invoice", path: "invoice" },
-    { label: "Customer", path: "customer" },
-    { label: "Vendor", path: "vendor" },
-    { label: "Total price & Profit", path: "total-price-profit" },
-  ];
 
   const handleTabClick = (tabPath) => {
     const tabKey = tabPath === "total-price-profit" ? "total price & profit" : tabPath;
@@ -214,6 +228,8 @@ const OrderDetails = () => {
         <div className="flex gap-3 mb-6">
           {tabs.map((tab) => {
             const tabKey = tab.path === "total-price-profit" ? "total price & profit" : tab.path;
+
+            if (!hasAccess(tabKey)) return null;
             return (
               <button
                 key={tab.path}
