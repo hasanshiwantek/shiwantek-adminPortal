@@ -73,12 +73,6 @@ const Header = () => {
               >
                 <Plus size={20} className="text-gray-600" />
               </button>
-              <button
-                onClick={() => navigate("/sheet")}
-                className="p-2 hover:bg-gray-100 rounded-full transition"
-              >
-                <Sheet size={20} className="text-gray-600" />
-              </button>
             </>
           )}
 

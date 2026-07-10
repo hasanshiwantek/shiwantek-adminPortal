@@ -15,6 +15,7 @@ import NotAllowed from "../components/notallowed/NotAllowed";
 import Pagination from "../components/Pagination";
 import { OrderCardSkeleton } from "../components/Utils";
 import { toNumber } from "../utils/constant";
+import { useNavigate } from "react-router-dom";
 
 const staticDashboardData = {
   order_value: 235000,
@@ -105,6 +106,8 @@ const staticDashboardData = {
 
 const Dashboard = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+
   const { users, Orders, userloading, orderloading, error: usersError } = useSelector((state) => state.users);
   const { token, user: authUser } = useSelector((state) => state.auth);
   const [data, setData] = useState(staticDashboardData);
@@ -294,7 +297,16 @@ const Dashboard = () => {
           <StatsCard key={i} {...stat} />
         ))}
       </div>
-
+      <div style={{ display: 'flex', gap: '12px' }}>
+        <button
+          // onClick={exportToExcel}
+          onClick={() => navigate("/sheet")}
+          className="bg-indigo-600"
+          style={{ padding: '8px 16px', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', marginBottom: "5px" }}
+        >
+          Veiw sheet
+        </button>
+      </div>
 
       {/* ==== Orders Section ==== */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

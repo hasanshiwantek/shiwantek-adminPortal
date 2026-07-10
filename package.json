@@ -15,6 +15,8 @@
     "date-fns": "^4.1.0",
     "handsontable": "^18.0.0",
     "hyperformula": "^3.3.0",
+    "jspdf": "^4.2.1",
+    "jspdf-autotable": "^5.0.8",
     "lucide-react": "^0.552.0",
     "react": "^18.2.0",
     "react-datepicker": "^8.8.0",
@@ -24,7 +26,8 @@
     "react-redux": "^9.2.0",
     "react-router-dom": "^6.22.1",
     "react-toastify": "^11.0.5",
-    "redux-persist": "^6.0.0"
+    "redux-persist": "^6.0.0",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.21",
