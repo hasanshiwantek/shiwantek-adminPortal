@@ -19,6 +19,7 @@ import StoreSelection from "./pages/StoreSelection";
 import ProtectedStore from "./components/ProtectedStore";
 import AdminSheets from "./components/AdminSheets";
 import PtotectecAdmin from "./components/PtotectecAdmin";
+import FinanceDashboard from "./components/FinanceDashboard";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
@@ -34,9 +35,9 @@ ReactDOM.createRoot(document.getElementById("root")).render(
             <Route
               path="/store"
               element={
-                  <ProtectedStore>
-                    <StoreSelection/>
-                  </ProtectedStore>
+                <ProtectedStore>
+                  <StoreSelection />
+                </ProtectedStore>
               }
             />
             <Route
@@ -46,6 +47,16 @@ ReactDOM.createRoot(document.getElementById("root")).render(
                   <ProtectedRoute>
                     <Dashboard />
                   </ProtectedRoute>
+                </Layout>
+              }
+            />
+            <Route
+              path="/sheet"
+              element={
+                <Layout>
+                  <PtotectecAdmin>
+                    <FinanceDashboard />
+                  </PtotectecAdmin>
                 </Layout>
               }
             />

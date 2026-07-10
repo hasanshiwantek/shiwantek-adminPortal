@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
-import { LogOut, X, Plus, UserCircle } from "lucide-react";
+import { LogOut, X, Plus, UserCircle, Sheet } from "lucide-react";
 import { useForm } from "react-hook-form"; // ✅ import react-hook-form
 import logo from "../assets/header-logo.svg";
 import { logoutManual } from "../store/authSlice";
@@ -18,7 +18,7 @@ const Header = () => {
   const [showUserModal, setShowUserModal] = React.useState(false);
   const [showLogoutModal, setShowLogoutModal] = React.useState(false);
   const [showProfileModal, setShowProfileModal] = React.useState(false);
-   const roleId = user?.role_id;
+  const roleId = user?.role_id;
 
   const {
     register,
@@ -46,7 +46,7 @@ const Header = () => {
       <header className="flex items-center justify-between mb-10 relative bg-[#FFFFFF] px-6 md:px-10 py-6">
         <div className="flex items-center gap-3">
           <Link to={"/dashboard"} >
-          <img src={logo} alt="Shiwantek" className="h-11"  onError={(e) => (e.target.style.display = "none")} />
+            <img src={logo} alt="Shiwantek" className="h-11" onError={(e) => (e.target.style.display = "none")} />
           </Link>
         </div>
 
@@ -73,9 +73,15 @@ const Header = () => {
               >
                 <Plus size={20} className="text-gray-600" />
               </button>
+              <button
+                onClick={() => navigate("/sheet")}
+                className="p-2 hover:bg-gray-100 rounded-full transition"
+              >
+                <Sheet size={20} className="text-gray-600" />
+              </button>
             </>
           )}
-         
+
           <button
             onClick={() => setShowLogoutModal(true)}
             className="p-2 hover:bg-gray-100 rounded-full transition"
