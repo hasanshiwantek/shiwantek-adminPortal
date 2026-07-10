@@ -1,45 +1,45 @@
-import { useRef, useState, useEffect } from 'react';
-import { HotTable } from '@handsontable/react-wrapper';
-import { HyperFormula } from 'hyperformula';
-import { registerAllModules } from 'handsontable/registry';
-import 'handsontable/styles/handsontable.min.css';
-import 'handsontable/styles/ht-theme-main.min.css';
+// import { useRef, useState, useEffect } from 'react';
+// import { HotTable } from '@handsontable/react-wrapper';
+// import { HyperFormula } from 'hyperformula';
+// import { registerAllModules } from 'handsontable/registry';
+// import 'handsontable/styles/handsontable.min.css';
+// import 'handsontable/styles/ht-theme-main.min.css';
 
-registerAllModules();
+// registerAllModules();
 
-const orderData = [
-  // === HEADER ROW ===
-  [
-    "Order#", "Charged Date", "Lead Source", "Procured By", "Order Date", "Refund Date",
-    "Sales Agent", "Invoice#", "Invoice Link", "Order Source", "Payment Status", "Brands",
-    "Category", "part#", "Qty", "Condition", "Shipping A/C", "Bill to address", "Ship to address",
-    "City", "State", "Country", "Carrier", "Tracking#", "Status", "Reasons (IF any)",
-    "Customer", "Customer Company", "Email", "Phone", "Customer PO#", "Price", "Shipping",
-    "Tax", "Vendor", "Vendor order#", "Vendor Part#", "Status", "CC/Paypal 4%", "Charged Vendor",
-    "Paid Via", "Cost", "Vendor Shipping", "Vendor Tax", "Total Price", "Total Cost",
-    "Total Cost+4%", "Gross Profit", "Gross Profit-4%", "Profit %", "Check/Invoice#",
-    "Entry Check", "Attached To Order", "Entry Reason", "Comment"
-  ],
+// // const orderData = [
+// //   // === HEADER ROW ===
+// //   [
+// //     "Order#", "Charged Date", "Lead Source", "Procured By", "Order Date", "Refund Date",
+// //     "Sales Agent", "Invoice#", "Invoice Link", "Order Source", "Payment Status", "Brands",
+// //     "Category", "part#", "Qty", "Condition", "Shipping A/C", "Bill to address", "Ship to address",
+// //     "City", "State", "Country", "Carrier", "Tracking#", "Status", "Reasons (IF any)",
+// //     "Customer", "Customer Company", "Email", "Phone", "Customer PO#", "Price", "Shipping",
+// //     "Tax", "Vendor", "Vendor order#", "Vendor Part#", "Status", "CC/Paypal 4%", "Charged Vendor",
+// //     "Paid Via", "Cost", "Vendor Shipping", "Vendor Tax", "Total Price", "Total Cost",
+// //     "Total Cost+4%", "Gross Profit", "Gross Profit-4%", "Profit %", "Check/Invoice#",
+// //     "Entry Check", "Attached To Order", "Entry Reason", "Comment"
+// //   ],
 
-  // === REAL DATA ROWS (from your Excel file) ===
-  ["311711", "4/12/2026", "PPC Direct", "Bill Dawson", "4/12/2026", "", "PPC", "", "", "PPC Direct", "Charged-stripe", "Dell", "SSD", "8C3CP", 1, "Refurb", "Vendor Account", "3939 Lavista Rd E245 Tucker, Georgia, 30084 USA", "3939 Lavista Rd E245 Tucker, Georgia, 30084 USA", "Tucker", "Georgia", "USA", "USPS", "940010810624...", "Delivered", "", "Lucien Cook", "-", "olb.lhc@live.com", "2102102100", "", 79.98, 10, "", "eBay - unlocked4life", "19-14433-08660", "", "", 2.91, "", "CC", 45, "", 3.6, 89.98, 48.6, 51.51, 41.38, 38.47, "42.75%", "", "", "", "", ""],
+// //   // === REAL DATA ROWS (from your Excel file) ===
+// //   ["311711", "4/12/2026", "PPC Direct", "Bill Dawson", "4/12/2026", "", "PPC", "", "", "PPC Direct", "Charged-stripe", "Dell", "SSD", "8C3CP", 1, "Refurb", "Vendor Account", "3939 Lavista Rd E245 Tucker, Georgia, 30084 USA", "3939 Lavista Rd E245 Tucker, Georgia, 30084 USA", "Tucker", "Georgia", "USA", "USPS", "940010810624...", "Delivered", "", "Lucien Cook", "-", "olb.lhc@live.com", "2102102100", "", 79.98, 10, "", "eBay - unlocked4life", "19-14433-08660", "", "", 2.91, "", "CC", 45, "", 3.6, 89.98, 48.6, 51.51, 41.38, 38.47, "42.75%", "", "", "", "", ""],
 
-  ["311712", "4/12/2026", "PPC Direct", "Bill Dawson", "4/12/2026", "", "PPC", "", "", "PPC Direct", "Charged-stripe", "D-Link", "Rouder", "DAP-2553", 1, "Refurb", "Vendor Account", "20360 N 110TH LANE SUN CITY, Arizona, 85373 USA", "10401 W Thunderbird Blvd, SUN CITY, Arizona, 85351 USA", "SUN CITY", "Arizona", "USA", "USPS", "943463610619...", "Delivered", "", "DEBORAH TESTA", "-", "Deborah.testa@gmail.com", "4803325454", "", 127.18, 194.11, "", "eBay - blue_frog_enterprises", "11-14448-31542", "", "", 9.62, "", "CC", 47.99, 15.25, 15.25, 321.29, 78.49, 88.11, 242.8, 233.18, "72.58%", "", "Serial # PVIAU1B7000406", "", "", ""],
+// //   ["311712", "4/12/2026", "PPC Direct", "Bill Dawson", "4/12/2026", "", "PPC", "", "", "PPC Direct", "Charged-stripe", "D-Link", "Rouder", "DAP-2553", 1, "Refurb", "Vendor Account", "20360 N 110TH LANE SUN CITY, Arizona, 85373 USA", "10401 W Thunderbird Blvd, SUN CITY, Arizona, 85351 USA", "SUN CITY", "Arizona", "USA", "USPS", "943463610619...", "Delivered", "", "DEBORAH TESTA", "-", "Deborah.testa@gmail.com", "4803325454", "", 127.18, 194.11, "", "eBay - blue_frog_enterprises", "11-14448-31542", "", "", 9.62, "", "CC", 47.99, 15.25, 15.25, 321.29, 78.49, 88.11, 242.8, 233.18, "72.58%", "", "Serial # PVIAU1B7000406", "", "", ""],
 
-  ["311712", "4/12/2026", "PPC Direct", "Bill Dawson", "4/12/2026", "", "PPC", "", "", "PPC Direct", "Charged-stripe", "D-Link", "Rouder", "DAP-2553", 1, "Refurb", "Vendor Account", "20360 N 110TH LANE SUN CITY, Arizona, 85373 USA", "10401 W Thunderbird Blvd, SUN CITY, Arizona, 85351 USA", "SUN CITY", "Arizona", "USA", "USPS", "943460810624...", "Delivered", "", "DEBORAH TESTA", "-", "Deborah.testa@gmail.com", "4803325454", "", "", "", "", "eBay - admin.sayyah1", "14-14445-13733", "", "", 0, "", "CC", 38.99, 16.99, 2.46, 0, 58.44, 58.44, -58.44, -58.44, "#DIV/0!", "", "", "", "", ""],
+// //   ["311712", "4/12/2026", "PPC Direct", "Bill Dawson", "4/12/2026", "", "PPC", "", "", "PPC Direct", "Charged-stripe", "D-Link", "Rouder", "DAP-2553", 1, "Refurb", "Vendor Account", "20360 N 110TH LANE SUN CITY, Arizona, 85373 USA", "10401 W Thunderbird Blvd, SUN CITY, Arizona, 85351 USA", "SUN CITY", "Arizona", "USA", "USPS", "943460810624...", "Delivered", "", "DEBORAH TESTA", "-", "Deborah.testa@gmail.com", "4803325454", "", "", "", "", "eBay - admin.sayyah1", "14-14445-13733", "", "", 0, "", "CC", 38.99, 16.99, 2.46, 0, 58.44, 58.44, -58.44, -58.44, "#DIV/0!", "", "", "", "", ""],
 
-  ["311717", "4/12/2026", "Order Update", "Bill Dawson", "4/12/2026", "", "Frank", "KOMCQFQH-0001", "https://invoice.stripe.com/...", "Order Update", "Charged-stripe", "Brady", "Printer", "BBP11-34L", 1, "Refurb", "Vendor Account", "W57N14386 Doerr Way East Bldg Cedarburg, WI, Wisconsin, 53012 USA", "W57N14386 Doerr Way East Bldg Cedarburg, WI, Wisconsin, 53012 USA", "Cedarburg", "Wisconsin", "USA", "UPS Ground", "1Z78AR120394...", "Delivered", "", "Amy Krumbiegel", "Carlson Tool & Manufacturing Corp", "akrumbiegel@gmail.com", "2623778771", "", 199.65, 35.15, "", "eBay - solutionsdepot", "24-14445-73926", "", "", 7.11, "", "CC", 180, "", 9.9, 234.8, 189.9, 197.01, 44.9, 37.79, "16.09%", "", "", "", "", ""],
+// //   ["311717", "4/12/2026", "Order Update", "Bill Dawson", "4/12/2026", "", "Frank", "KOMCQFQH-0001", "https://invoice.stripe.com/...", "Order Update", "Charged-stripe", "Brady", "Printer", "BBP11-34L", 1, "Refurb", "Vendor Account", "W57N14386 Doerr Way East Bldg Cedarburg, WI, Wisconsin, 53012 USA", "W57N14386 Doerr Way East Bldg Cedarburg, WI, Wisconsin, 53012 USA", "Cedarburg", "Wisconsin", "USA", "UPS Ground", "1Z78AR120394...", "Delivered", "", "Amy Krumbiegel", "Carlson Tool & Manufacturing Corp", "akrumbiegel@gmail.com", "2623778771", "", 199.65, 35.15, "", "eBay - solutionsdepot", "24-14445-73926", "", "", 7.11, "", "CC", 180, "", 9.9, 234.8, 189.9, 197.01, 44.9, 37.79, "16.09%", "", "", "", "", ""],
 
-  ["311718", "4/12/2026", "PPC Direct", "Bill Dawson", "4/12/2026", "", "PPC", "", "", "PPC Direct", "Charged-stripe", "Canon", "Scanner", "2925B002", 1, "Refurb", "Vendor Account", "32912 Danapoplar Dana Point, California, 92629 USA", "32912 Danapoplar Dana Point, California, 92629 USA", "Dana Point", "California", "USA", "USPS", "943460810624...", "Delivered", "RMA open Reason : We received the scanner...", "Darrell Foster", "-", "fdarrell44@gmail.com", "", "", 161.36, 10, "", "eBay - idioteque928", "15-14443-21604", "", "", 5.27, "", "CC", 36, 16.8, 2.79, 171.36, 55.59, 60.86, 115.77, 110.5, "64.48%", "", "R Label tracking : 9302...", "RMA closed got refund from vendor", ""],
+// //   ["311718", "4/12/2026", "PPC Direct", "Bill Dawson", "4/12/2026", "", "PPC", "", "", "PPC Direct", "Charged-stripe", "Canon", "Scanner", "2925B002", 1, "Refurb", "Vendor Account", "32912 Danapoplar Dana Point, California, 92629 USA", "32912 Danapoplar Dana Point, California, 92629 USA", "Dana Point", "California", "USA", "USPS", "943460810624...", "Delivered", "RMA open Reason : We received the scanner...", "Darrell Foster", "-", "fdarrell44@gmail.com", "", "", 161.36, 10, "", "eBay - idioteque928", "15-14443-21604", "", "", 5.27, "", "CC", 36, 16.8, 2.79, 171.36, 55.59, 60.86, 115.77, 110.5, "64.48%", "", "R Label tracking : 9302...", "RMA closed got refund from vendor", ""],
 
-  ["311718", "4/12/2026", "PPC Direct", "Bill Dawson", "4/12/2026", "", "PPC", "", "", "PPC Direct", "Charged-stripe", "Canon", "Scanner", "2925B002", 1, "Refurb", "Vendor Account", "32912 Danapoplar Dana Point, California, 92629 USA", "32912 Danapoplar Dana Point, California, 92629 USA", "Dana Point", "California", "USA", "USPS", "", "", "Full refund to cx", "Darrell Foster", "-", "fdarrell44@gmail.com", "", "", 55.59, "", "", "", "", "", "", 0, "", "", "", "", "", 171.36, 171.36, -115.77, -115.77, "-2.0826", "", "", "", "", ""],
+// //   ["311718", "4/12/2026", "PPC Direct", "Bill Dawson", "4/12/2026", "", "PPC", "", "", "PPC Direct", "Charged-stripe", "Canon", "Scanner", "2925B002", 1, "Refurb", "Vendor Account", "32912 Danapoplar Dana Point, California, 92629 USA", "32912 Danapoplar Dana Point, California, 92629 USA", "Dana Point", "California", "USA", "USPS", "", "", "Full refund to cx", "Darrell Foster", "-", "fdarrell44@gmail.com", "", "", 55.59, "", "", "", "", "", "", 0, "", "", "", "", "", 171.36, 171.36, -115.77, -115.77, "-2.0826", "", "", "", "", ""],
 
-  ["311719", "4/12/2026", "PPC Direct", "Bill Dawson", "4/12/2026", "", "PPC", "", "", "PPC Direct", "Charged-stripe", "Crestron", "Pair Receiver", "HD-RX3-CB", 1, "Refurb", "Vendor Account", "1020 Detroit Ave Concord, California, 94518 USA", "1020 Detroit Ave Concord, California, 94518 USA", "Concord", "California", "USA", "UPS Ground", "1ZHG199603...", "Delivered", "", "Patrick Canada", "PG&E", "PJCJ@gmail.com", "9257198844", "", 33.88, 5, "", "eBay - musthavegear", "01-14464-27399", "", "", 3.81, "", "CC", 14.99, "", 1.46, 38.88, 16.45, 20.26, 22.43, 18.62, "47.89%", "", "", "", "", ""],
+// //   ["311719", "4/12/2026", "PPC Direct", "Bill Dawson", "4/12/2026", "", "PPC", "", "", "PPC Direct", "Charged-stripe", "Crestron", "Pair Receiver", "HD-RX3-CB", 1, "Refurb", "Vendor Account", "1020 Detroit Ave Concord, California, 94518 USA", "1020 Detroit Ave Concord, California, 94518 USA", "Concord", "California", "USA", "UPS Ground", "1ZHG199603...", "Delivered", "", "Patrick Canada", "PG&E", "PJCJ@gmail.com", "9257198844", "", 33.88, 5, "", "eBay - musthavegear", "01-14464-27399", "", "", 3.81, "", "CC", 14.99, "", 1.46, 38.88, 16.45, 20.26, 22.43, 18.62, "47.89%", "", "", "", "", ""],
 
-  ["311719", "4/12/2026", "PPC Direct", "Bill Dawson", "4/12/2026", "", "PPC", "", "", "PPC Direct", "Charged-stripe", "Crestron", "Adapter", "HD-TX3-C-W", 1, "Refurb", "Vendor Account", "1020 Detroit Ave Concord, California, 94518 USA", "1020 Detroit Ave Concord, California, 94518 USA", "Concord", "California", "USA", "USPS", "940015020622...", "Delivered", "", "Patrick Canada", "PG&E", "PJCJ@gmail.com", "9257198844", "", 77.32, 5, "", "eBay - werks1234", "04-14462-33323", "", "", 0, "", "CC", 23, "", 2.24, 82.32, 25.24, 25.24, 57.08, 57.08, "69.34%", "", "", "", "", ""],
+// //   ["311719", "4/12/2026", "PPC Direct", "Bill Dawson", "4/12/2026", "", "PPC", "", "", "PPC Direct", "Charged-stripe", "Crestron", "Adapter", "HD-TX3-C-W", 1, "Refurb", "Vendor Account", "1020 Detroit Ave Concord, California, 94518 USA", "1020 Detroit Ave Concord, California, 94518 USA", "Concord", "California", "USA", "USPS", "940015020622...", "Delivered", "", "Patrick Canada", "PG&E", "PJCJ@gmail.com", "9257198844", "", 77.32, 5, "", "eBay - werks1234", "04-14462-33323", "", "", 0, "", "CC", 23, "", 2.24, 82.32, 25.24, 25.24, 57.08, 57.08, "69.34%", "", "", "", "", ""],
 
-  ["311719", "4/12/2026", "PPC Direct", "Bill Dawson", "4/12/2026", "", "PPC", "", "", "PPC Direct", "Charged-stripe", "Crestron", "Adapter", "HD-TX3-C-W", 1, "Refurb", "Vendor Account", "1020 Detroit Ave Concord, California, 94518 USA", "1020 Detroit Ave Concord, California, 94518 USA", "Concord", "California", "USA", "USPS", "921449040447...", "Delivered", "", "Patrick Canada", "PG&E", "PJCJ@gmail.com", "9257198844", "", "", "", "", "eBay - bestadapter", "14-14493-62519", "", "", 0, "", "CC", 9.99, 3.99, 0.97, 0, 14.95, 14.95, -14.95, -14.95, "#DIV/0!", "", "Note : Order is for AC adapter", "", ""]
-];
+// //   ["311719", "4/12/2026", "PPC Direct", "Bill Dawson", "4/12/2026", "", "PPC", "", "", "PPC Direct", "Charged-stripe", "Crestron", "Adapter", "HD-TX3-C-W", 1, "Refurb", "Vendor Account", "1020 Detroit Ave Concord, California, 94518 USA", "1020 Detroit Ave Concord, California, 94518 USA", "Concord", "California", "USA", "USPS", "921449040447...", "Delivered", "", "Patrick Canada", "PG&E", "PJCJ@gmail.com", "9257198844", "", "", "", "", "eBay - bestadapter", "14-14493-62519", "", "", 0, "", "CC", 9.99, 3.99, 0.97, 0, 14.95, 14.95, -14.95, -14.95, "#DIV/0!", "", "Note : Order is for AC adapter", "", ""]
+// // ];
 // const orderData = [
 //   {
 //     "Order#": "311711",
@@ -209,55 +209,153 @@ const orderData = [
 //   }
 //   // Add the remaining orders here (311718, 311719 etc.) in same format
 // ];
+// function OrderListTable() {
+//   const hotRef = useRef(null);
+
+//   return (
+//     <div style={{ width: '100%', padding: '20px' }}>
+//       <h2 style={{ marginBottom: '16px' }}>CTS Dashboard - Order Sheet</h2>
+
+//       <HotTable
+//         ref={hotRef}
+//         data={orderData}
+//         themeName="ht-theme-main"
+//         height="auto"
+//         width="100%"
+//         stretchH="all"
+//         rowHeaders={true}
+//         colHeaders={true}
+//         licenseKey="non-commercial-and-evaluation"
+//         formulas={{ engine: HyperFormula }}
+//         filters={true}
+//         dropdownMenu={true}
+//         contextMenu={true}
+//         manualColumnResize={true}
+//         manualRowResize={true}
+//         columnSorting={true}
+//         fixedColumnsStart={2}           // Freeze first 2 columns
+//         colWidths={[
+//           90, 100, 110, 120, 100, 100, 110, 110, 180, 120,
+//           130, 110, 120, 110, 60, 90, 130, 220, 220, 110,
+//           90, 80, 110, 140, 100, 200, 140, 140, 180, 120,
+//           110, 100, 90, 140, 140, 120, 100, 110, 110, 100,
+//           100, 100, 100, 110, 110, 130, 130, 130, 100, 100,
+//           120, 120, 140, 200
+//         ]}
+//         cells={(row, col) => {
+//           if (row === 0) {
+//             return { className: 'htHeader' }; // Bold headers
+//           }
+//           // Optional: color negative profits
+//           if (col === 47 && orderData[row]?.[47] && orderData[row][47] < 0) {
+//             return { className: 'htNegative' };
+//           }
+//           return {};
+//         }}
+//       />
+
+//       <style jsx>{`
+//         .htHeader { font-weight: bold; background: #fff2cc; }
+//         .htNegative { color: red; font-weight: bold; }
+//       `}</style>
+//     </div>
+//   );
+// }
+
+// export default OrderListTable;
+
+
+
+import { useRef } from 'react';
+import { HotTable } from '@handsontable/react-wrapper';
+import { registerAllModules } from 'handsontable/registry';
+import 'handsontable/styles/handsontable.min.css';
+import 'handsontable/styles/ht-theme-main.min.css';
+import { useSelector } from 'react-redux';
+
+registerAllModules();
+
+
+const columns = [
+  { data: "Order#", title: "Order#" },
+  { data: "Charged Date", title: "Charged Date" },
+  { data: "Lead Source", title: "Lead Source" },
+  { data: "Procured By", title: "Procured By" },
+  { data: "Order Date", title: "Order Date" },
+  { data: "Refund Date", title: "Refund Date" },
+  { data: "Sales Agent", title: "Sales Agent" },
+  { data: "Invoice#", title: "Invoice#" },
+  { data: "Invoice Link", title: "Invoice Link" },
+  { data: "Order Source", title: "Order Source" },
+  { data: "Payment Status", title: "Payment Status" },
+  { data: "Brands", title: "Brands" },
+  { data: "Category", title: "Category" },
+  { data: "part#", title: "part#" },
+  { data: "Qty", title: "Qty" },
+  { data: "Condition", title: "Condition" },
+  { data: "Shipping A/C", title: "Shipping A/C" },
+  { data: "Bill to address", title: "Bill to address" },
+  { data: "Ship to address", title: "Ship to address" },
+  { data: "City", title: "City" },
+  { data: "State", title: "State" },
+  { data: "Country", title: "Country" },
+  { data: "Carrier", title: "Carrier" },
+  { data: "Tracking", title: "Tracking#" },
+  { data: "Status", title: "Status" },
+  { data: "Reasons (IF any)", title: "Reasons (IF any)" },
+  { data: "Customer", title: "Customer" },
+  { data: "Customer Company", title: "Customer Company" },
+  { data: "Email", title: "Email" },
+  { data: "Phone", title: "Phone" },
+  { data: "Price", title: "Price" },
+  { data: "Shipping", title: "Shipping" },
+  { data: "Tax", title: "Tax" },
+  { data: "Vendor", title: "Vendor" },
+  { data: "Vendor order#", title: "Vendor order#" },
+  { data: "Vendor Part#", title: "Vendor Part#" },
+  { data: "CC/Paypal 4%", title: "CC/Paypal 4%" },
+  { data: "Charged Vendor", title: "Charged Vendor" },
+  { data: "Paid Via", title: "Paid Via" },
+  { data: "Cost", title: "Cost" },
+  { data: "Vendor Shipping", title: "Vendor Shipping" },
+  { data: "Vendor Tax", title: "Vendor Tax" },
+  { data: "Total Price", title: "Total Price" },
+  { data: "Total Cost", title: "Total Cost" },
+  { data: "Total Cost+4%", title: "Total Cost+4%" },
+  { data: "Gross Profit", title: "Gross Profit" },
+  { data: "Gross Profit-4%", title: "Gross Profit-4%" },
+  { data: "Profit %", title: "Profit %" },
+  { data: "Check/Invoice", title: "Check/Invoice" },
+  { data: "Entry Check", title: "Entry Check" },
+  { data: "Attached To Order", title: "Attached To Order" },
+  { data: "Entry Reason", title: "Entry Reason" },
+  { data: "Comment", title: "Comment" }
+];
+
 function OrderListTable() {
-  const hotRef = useRef(null);
+  const { Orders } = useSelector((state) => state.users);
+  const orderData = Orders
 
   return (
-    <div style={{ width: '100%', padding: '20px' }}>
-      <h2 style={{ marginBottom: '16px' }}>CTS Dashboard - Order Sheet</h2>
+    <div style={{ padding: '20px' }}>
+      <h2>CTS Dashboard - Order Sheet</h2>
 
       <HotTable
-        ref={hotRef}
         data={orderData}
-        themeName="ht-theme-main"
+        columns={columns}
+        colHeaders={true}
+        rowHeaders={true}
+        stretchH="all"
         height="auto"
         width="100%"
-        stretchH="all"
-        rowHeaders={true}
-        colHeaders={true}
         licenseKey="non-commercial-and-evaluation"
-        formulas={{ engine: HyperFormula }}
         filters={true}
         dropdownMenu={true}
         contextMenu={true}
         manualColumnResize={true}
-        manualRowResize={true}
         columnSorting={true}
-        fixedColumnsStart={2}           // Freeze first 2 columns
-        colWidths={[
-          90, 100, 110, 120, 100, 100, 110, 110, 180, 120,
-          130, 110, 120, 110, 60, 90, 130, 220, 220, 110,
-          90, 80, 110, 140, 100, 200, 140, 140, 180, 120,
-          110, 100, 90, 140, 140, 120, 100, 110, 110, 100,
-          100, 100, 100, 110, 110, 130, 130, 130, 100, 100,
-          120, 120, 140, 200
-        ]}
-        cells={(row, col) => {
-          if (row === 0) {
-            return { className: 'htHeader' }; // Bold headers
-          }
-          // Optional: color negative profits
-          if (col === 47 && orderData[row]?.[47] && orderData[row][47] < 0) {
-            return { className: 'htNegative' };
-          }
-          return {};
-        }}
+        fixedColumnsStart={2}
       />
-
-      <style jsx>{`
-        .htHeader { font-weight: bold; background: #fff2cc; }
-        .htNegative { color: red; font-weight: bold; }
-      `}</style>
     </div>
   );
 }
