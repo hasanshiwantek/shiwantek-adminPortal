@@ -16,6 +16,7 @@ import Pagination from "../components/Pagination";
 import { OrderCardSkeleton } from "../components/Utils";
 import { toNumber } from "../utils/constant";
 import { useNavigate } from "react-router-dom";
+import OrderDetailModal from "../components/OrderDetailModal";
 
 const staticDashboardData = {
   order_value: 235000,
@@ -116,7 +117,7 @@ const Dashboard = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const ordersPerPage = 10;
-
+  const [isAddMode, setIsAddMode] = useState(false);
   const [selectedAgent, setSelectedAgent] = useState("All");
   const [selectedProcuredBy, setSelectedProcuredBy] = useState("All");
   const [showDateFilter, setShowDateFilter] = useState(false);
@@ -200,25 +201,7 @@ const Dashboard = () => {
     return <p className="text-center mt-10 text-red-500">Failed to load data.</p>;
 
   // === Filter logic ===
-  // const filteredOrders = orderData.filter(order => {
-  //   const matchStatus =
-  //     selectedFilter === "All" ||
-  //     order.status?.toLowerCase().replace(/\s+/g, "") === selectedFilter.toLowerCase().replace(/\s+/g, "");
 
-  //   // order.status?.toLowerCase() === selectedFilter.toLowerCase();
-
-  //   const matchSearch = order.order_id
-  //     ?.toString()
-  //     .toLowerCase()
-  //     .includes(searchQuery.toLowerCase());
-
-  //   const orderDate = new Date(order.order_date);
-  //   const matchDate =
-  //     (!startDate || orderDate >= startDate) &&
-  //     (!endDate || orderDate <= endDate);
-
-  //   return matchStatus && matchSearch && matchDate;
-  // });
   const filteredOrders = orderData.filter(order => {
     const matchStatus =
       selectedFilter === "All" ||
@@ -286,6 +269,20 @@ const Dashboard = () => {
 
   return (
     <>
+      {isAddMode && (
+        <OrderDetailModal
+          order={null}
+          onClose={() => {
+            setIsAddMode(false);
+          }}
+          onSave={(data, isNew) => {
+            if (isNew) {
+              // Dispatch create new order
+              console.log("Create new order:", data);
+            }
+          }}
+        />
+      )}
       {/* ==== Stats Cards ==== */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
         {[
@@ -299,17 +296,23 @@ const Dashboard = () => {
       </div>
       <div style={{ display: 'flex', gap: '12px' }}>
         <button
-          // onClick={exportToExcel}
           onClick={() => navigate("/sheet")}
           className="bg-indigo-600"
           style={{ padding: '8px 16px', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', marginBottom: "5px" }}
         >
           Veiw sheet
         </button>
-      </div>
+        <button
+          onClick={() => setIsAddMode(true)}
+          className="bg-indigo-600"
+          style={{ padding: '8px 16px', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', marginBottom: "5px" }}
+        >
+          + Add Order
+        </button>
+      </div >
 
       {/* ==== Orders Section ==== */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8" >
         {/* === Orders List === */}
         {/* <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-6"> */}
         <div className={`${[1, 2].includes(roleId) ? "lg:col-span-2" : "lg:col-span-3"} bg-white rounded-2xl shadow-sm border border-gray-100 p-6`}>
@@ -437,88 +440,92 @@ const Dashboard = () => {
         </div>
 
         {/* === Users Section === */}
-        {[1, 2].includes(roleId) && <div>
-          <UsersSection
-            users={filteredUsers}
-            searchValue={userSearch}
-            onSearchChange={setUserSearch}
-            onCreateUserClick={toggleUserModal}
-            loading={userloading || (!hasFetchedUsers && token)}
-            error={usersError}
-          />
-        </div>}
+        {
+          [1, 2].includes(roleId) && <div>
+            <UsersSection
+              users={filteredUsers}
+              searchValue={userSearch}
+              onSearchChange={setUserSearch}
+              onCreateUserClick={toggleUserModal}
+              loading={userloading || (!hasFetchedUsers && token)}
+              error={usersError}
+            />
+          </div>
+        }
       </div>
 
       {/* ==== Date Filter Modal ==== */}
-      {showDateFilter && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex justify-center items-center z-50">
-          <div className="bg-white w-full max-w-sm rounded-2xl p-6 shadow-lg relative">
-            <button
-              onClick={() => setShowDateFilter(false)}
-              className="absolute right-4 top-4 text-gray-400 hover:text-gray-600"
-            >
-              <X size={20} />
-            </button>
+      {
+        showDateFilter && (
+          <div className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex justify-center items-center z-50">
+            <div className="bg-white w-full max-w-sm rounded-2xl p-6 shadow-lg relative">
+              <button
+                onClick={() => setShowDateFilter(false)}
+                className="absolute right-4 top-4 text-gray-400 hover:text-gray-600"
+              >
+                <X size={20} />
+              </button>
 
-            <h2 className="text-lg font-semibold text-gray-800 mb-3">
-              Select Date Range
-            </h2>
-            <div className="flex flex-col gap-4">
-              <div>
-                <label className="text-sm text-gray-600 font-medium">
-                  Start Date
-                </label>
-                <DatePicker
-                  selected={startDate}
-                  onChange={(date) => setStartDate(date)}
-                  selectsStart
-                  startDate={startDate}
-                  endDate={endDate}
-                  dateFormat="MM/dd/yyyy"
-                  className="w-full mt-1 p-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500"
-                  placeholderText="Select start date"
-                />
-              </div>
+              <h2 className="text-lg font-semibold text-gray-800 mb-3">
+                Select Date Range
+              </h2>
+              <div className="flex flex-col gap-4">
+                <div>
+                  <label className="text-sm text-gray-600 font-medium">
+                    Start Date
+                  </label>
+                  <DatePicker
+                    selected={startDate}
+                    onChange={(date) => setStartDate(date)}
+                    selectsStart
+                    startDate={startDate}
+                    endDate={endDate}
+                    dateFormat="MM/dd/yyyy"
+                    className="w-full mt-1 p-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500"
+                    placeholderText="Select start date"
+                  />
+                </div>
 
-              <div>
-                <label className="text-sm text-gray-600 font-medium">
-                  End Date
-                </label>
-                <DatePicker
-                  selected={endDate}
-                  onChange={(date) => setEndDate(date)}
-                  selectsEnd
-                  startDate={startDate}
-                  endDate={endDate}
-                  minDate={startDate}
-                  dateFormat="MM/dd/yyyy"
-                  className="w-full mt-1 p-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500"
-                  placeholderText="Select end date"
-                />
-              </div>
+                <div>
+                  <label className="text-sm text-gray-600 font-medium">
+                    End Date
+                  </label>
+                  <DatePicker
+                    selected={endDate}
+                    onChange={(date) => setEndDate(date)}
+                    selectsEnd
+                    startDate={startDate}
+                    endDate={endDate}
+                    minDate={startDate}
+                    dateFormat="MM/dd/yyyy"
+                    className="w-full mt-1 p-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500"
+                    placeholderText="Select end date"
+                  />
+                </div>
 
-              <div className="flex justify-between gap-3 mt-4">
-                <button
-                  onClick={() => {
-                    setStartDate(null);
-                    setEndDate(null);
-                    setShowDateFilter(false);
-                  }}
-                  className="w-1/2 border py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-100"
-                >
-                  Close
-                </button>
-                <button
-                  onClick={() => setShowDateFilter(false)}
-                  className="w-1/2 bg-indigo-600 text-white py-2 rounded-lg text-sm hover:bg-indigo-700"
-                >
-                  Continue
-                </button>
+                <div className="flex justify-between gap-3 mt-4">
+                  <button
+                    onClick={() => {
+                      setStartDate(null);
+                      setEndDate(null);
+                      setShowDateFilter(false);
+                    }}
+                    className="w-1/2 border py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-100"
+                  >
+                    Close
+                  </button>
+                  <button
+                    onClick={() => setShowDateFilter(false)}
+                    className="w-1/2 bg-indigo-600 text-white py-2 rounded-lg text-sm hover:bg-indigo-700"
+                  >
+                    Continue
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )
+      }
 
       {/* {showUserModal && <CreateUserModal onClose={() => setShowUserModal(false)} />} */}
     </>

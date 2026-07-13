@@ -1,8 +1,8 @@
 export const toNumber = (price) => {
-    if (!price) return 0;
-    const isNegative = price.toString().trim().startsWith("-");
-    const value = parseFloat(price.toString().replace(/[^0-9.]/g, ""));
-    return isNegative ? -value : value;
+  if (!price) return 0;
+  const isNegative = price.toString().trim().startsWith("-");
+  const value = parseFloat(price.toString().replace(/[^0-9.]/g, ""));
+  return isNegative ? -value : value;
 };
 export const columnsOfSheet = [
   { data: "Order#", title: "Order#" },
@@ -59,3 +59,60 @@ export const columnsOfSheet = [
   { data: "Entry Reason", title: "Entry Reason" },
   { data: "Comment", title: "Comment" }
 ];
+
+export const defaultOrder = {
+  "Order#": "",
+  "Charged Date": "",
+  "Lead Source": "",
+  "Procured By": "",
+  "Order Date": "",
+  "Refund Date": "",
+  "Sales Agent": "",
+  "Invoice#": "",
+  "Invoice Link": "",
+  "Order Source": "",
+  "Payment Status": "",
+  "Brands": "",
+  "Category": "",
+  "part#": "",
+  "Qty": "",
+  "Condition": "",
+  "Shipping A/C": "",
+  "Bill to address": "",
+  "Ship to address": "",
+  "City": "",
+  "State": "",
+  "Country": "",
+  "Carrier": "",
+  "Tracking": "",
+  "Status": "",
+  "Reasons (IF any)": "",
+  "Customer": "",
+  "Customer Company": "",
+  "Email": "",
+  "Phone": "",
+  "Customer PO#": "",
+  "Price": "",
+  "Shipping": "",
+  "Tax": "",
+  "Vendor": "",
+  "Vendor order#": "",
+  "Vendor Part#": "",
+  "CC/Paypal 4%": "",
+  "Charged Vendor": "",
+  "Paid Via": "",
+  "Cost": "",
+  "Vendor Shipping": "",
+  "Vendor Tax": "",
+  "Total Price": "",
+  "Total Cost": "",
+  "Total Cost+4%": "",
+  "Gross Profit": "",
+  "Gross Profit-4%": "",
+  "Profit %": "",
+  "Check/Invoice": "",
+  "Entry Check": "",
+  "Attached To Order": "",
+  "Entry Reason": "",
+  "Comment": ""
+};
