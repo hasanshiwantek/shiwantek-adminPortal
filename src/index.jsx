@@ -19,7 +19,7 @@ import StoreSelection from "./pages/StoreSelection";
 import ProtectedStore from "./components/ProtectedStore";
 import AdminSheets from "./components/AdminSheets";
 import PtotectecAdmin from "./components/PtotectecAdmin";
-import FinanceDashboard from "./components/FinanceDashboard";
+import OrderListTable from "./components/OrderListTable";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
@@ -55,7 +55,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
               element={
                 <Layout>
                   <PtotectecAdmin>
-                    <FinanceDashboard />
+                    <OrderListTable />
                   </PtotectecAdmin>
                 </Layout>
               }
