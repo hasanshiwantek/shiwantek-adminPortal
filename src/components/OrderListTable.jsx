@@ -102,7 +102,7 @@ function OrderListTable() {
       setSelectedOrder(clickedOrder);
     }
   };
-  
+
   if (orderloading) {
     return (
       <div style={{ padding: '40px', textAlign: 'center' }}>
@@ -176,7 +176,7 @@ function OrderListTable() {
       )}
       <div style={{ padding: '20px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-          <h2>CTS Dashboard - Order Sheet</h2>
+          <h2>Dashboard - Order Sheet</h2>
 
           <div style={{ display: 'flex', gap: '12px' }}>
             <button
@@ -219,7 +219,12 @@ function OrderListTable() {
             width="100%"
             licenseKey="non-commercial-and-evaluation"
             filters={true}
-            dropdownMenu={true}
+            dropdownMenu={false}
+            // dropdownMenu={[
+            //   'filter_by_condition',
+            //   'filter_by_value',
+            //   'filter_action_bar'
+            // ]}
             contextMenu={true}
             manualColumnResize={true}
             columnSorting={true}

@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axiosInstance from '../Axios/axiosInstance';
 
+
 const initialState = {
   users: [],
   Orders: [],
@@ -236,8 +237,21 @@ export const updateSheet = createAsyncThunk(
     }
   }
 );
-
-
+export const fetchOrderById = createAsyncThunk(
+  "users/fetchOrderById",
+  async (orderId, { rejectWithValue }) => {
+    try {
+      const res = await axiosInstance.get(`/order-files/${orderId}`);
+      const result = res.data;
+      const fetchedOrder = result?.data || result?.order || result;
+      return fetchedOrder;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || error.message || "Failed to fetch order"
+      );
+    }
+  }
+);
 const usersSlice = createSlice({
   name: 'users',
   initialState,
