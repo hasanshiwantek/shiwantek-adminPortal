@@ -266,7 +266,7 @@ const EditOrderDetailModal = ({ order, onClose, onSave }) => {
                 if (trimmed && trimmed !== lastFetchedId.current) {
                     fetchOrderByIdFun(trimmed);
                 }
-            }, 600); // 600ms debounce
+            }, 900); // 600ms debounce
         }
     };
 
