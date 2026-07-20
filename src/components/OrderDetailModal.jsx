@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { defaultOrder } from '../utils/constant';
+import { useSelector } from 'react-redux';
 
 const OrderDetailModal = ({ order = null, onClose, onSave }) => {
     const isNewOrder = !order;
+    const { pending } = useSelector((state) => state.users);
 
     const [formData, setFormData] = useState({});
     const [isEditing, setIsEditing] = useState(isNewOrder); // New orders start in edit mode
@@ -62,22 +64,13 @@ const OrderDetailModal = ({ order = null, onClose, onSave }) => {
                 </div>
 
                 <div className="border-t p-6 flex gap-3 bg-gray-50">
-                    <button
-                        type="button"
-                        onClick={() => setIsEditing(!isEditing)}
-                        className="flex-1 py-3 border border-gray-300 rounded-xl hover:bg-gray-100 font-medium"
-                    >
-                        {isEditing ? "Cancel" : "✏️ Edit"}
-                    </button>
 
-                    {isEditing && (
                         <button
                             onClick={handleSubmit}
                             className="flex-1 bg-indigo-600 text-white py-3 rounded-xl font-medium hover:bg-indigo-700"
                         >
-                            {isNewOrder ? "Create Order" : "Save Changes"}
+                            {pending ? "Loading.." : "Create Order"}
                         </button>
-                    )}
                 </div>
             </div>
         </div>

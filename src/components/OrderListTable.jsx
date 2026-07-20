@@ -4,12 +4,14 @@ import { registerAllModules } from 'handsontable/registry';
 import { useDispatch, useSelector } from 'react-redux';
 import autoTable from 'jspdf-autotable';   // ← Changed import
 import EditOrderDetailModal from './EditOrderDetailModal';
-import { fetchOrdersAdmin, fetchOrders } from '../store/usersSlice';
+import { fetchOrdersAdmin, fetchOrders, postOrderFiles, updateOrderFiles } from '../store/usersSlice';
 import { columnsOfSheet } from '../utils/constant';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import 'handsontable/styles/handsontable.min.css';
 import 'handsontable/styles/ht-theme-main.min.css';
+import OrderDetailModal from './OrderDetailModal';
+import ExportOrdersPdf from './ExportOrdersPdf';
 
 registerAllModules();
 
@@ -19,6 +21,7 @@ function OrderListTable() {
   const { Orders, orderloading } = useSelector((state) => state.users);
   const { token, storeId, user: authUser } = useSelector((state) => state.auth);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [isAddMode, setIsAddMode] = useState(false);
   const exportToExcel = () => {
     if (!Orders || Orders.length === 0) return alert("No data to export");
 
@@ -36,7 +39,7 @@ function OrderListTable() {
     const doc = new jsPDF({
       orientation: 'landscape',
       unit: 'mm',
-      format: 'a1'   // Use bigger paper size for many columns
+      format: 'a1'
     });
 
     doc.setFontSize(14);
@@ -45,12 +48,9 @@ function OrderListTable() {
     const tableColumn = columnsOfSheet.map(col => col.title);
     const tableRows = Orders.map(order =>
       columnsOfSheet.map(col => {
-        let value = order[col.data] ?? "";
-        // Clean long text
-        if (typeof value === 'string' && value.length > 30) {
-          value = value.substring(0, 27) + "...";
-        }
-        return value;
+        let value = order[col.data];
+        if (value === null || value === undefined) return "";
+        return String(value); // full value, no truncation
       })
     );
 
@@ -59,24 +59,33 @@ function OrderListTable() {
       body: tableRows,
       startY: 30,
       styles: {
-        fontSize: 7,           // Smaller font
-        cellPadding: 2,
-        overflow: 'linebreak'
+        fontSize: 6,
+        cellPadding: 1.5,
+        overflow: 'linebreak',   // wraps long text instead of cutting it
+        valign: 'top'
       },
       headStyles: {
         fillColor: [27, 81, 239],
-        fontSize: 8,
-        textColor: 255
+        fontSize: 7,
+        textColor: 255,
+        overflow: 'linebreak'
       },
       alternateRowStyles: { fillColor: [245, 245, 245] },
       margin: { top: 25, right: 10, bottom: 15, left: 10 },
-      tableWidth: 'auto',
+      tableWidth: 'wrap',
       columnStyles: {
-        0: { cellWidth: 25 },   // Order#
-        17: { cellWidth: 40 },  // Bill to address
-        18: { cellWidth: 40 },  // Ship to address
-        28: { cellWidth: 35 },  // Email
-        // Add more if needed
+        0: { cellWidth: 22 },
+        17: { cellWidth: 45 },
+        18: { cellWidth: 45 },
+        28: { cellWidth: 40 }
+      },
+      didDrawPage: (data) => {
+        doc.setFontSize(8);
+        doc.text(
+          `Page ${doc.internal.getNumberOfPages()}`,
+          data.settings.margin.left,
+          doc.internal.pageSize.getHeight() - 8
+        );
       }
     });
 
@@ -86,24 +95,18 @@ function OrderListTable() {
   const handleOrderClick = (rowIndex) => {
     // rowIndex from Handsontable is 0-based (header is row 0)
     const actualDataIndex = rowIndex;
+
     const clickedOrder = Orders[actualDataIndex];
 
     if (clickedOrder) {
       setSelectedOrder(clickedOrder);
     }
   };
-  useEffect(() => {
-    if (authUser?.role_id === 1 || authUser?.role_id === 2) {
-      dispatch(fetchOrdersAdmin(storeId?.sheet_id));
-    } else {
-      dispatch(fetchOrders());
-    }
-  }, [authUser?.role_id, dispatch, storeId?.sheet_id]);
-
+  
   if (orderloading) {
     return (
       <div style={{ padding: '40px', textAlign: 'center' }}>
-        <h2>CTS Dashboard - Order Sheet</h2>
+        <h2>Dashboard - Order Sheet</h2>
         <div style={{
           display: 'flex',
           flexDirection: 'column',
@@ -140,9 +143,34 @@ function OrderListTable() {
           order={selectedOrder}
           onClose={() => setSelectedOrder(null)}
           onSave={(updatedOrder) => {
-            // Dispatch update action here if needed
-            console.log("Updated Order:", updatedOrder);
-            // Example: dispatch(updateOrder(updatedOrder));
+            dispatch(updateOrderFiles({ id: updatedOrder["Order#"], data: updatedOrder }))
+              .unwrap()
+              .then(() => {
+                dispatch(fetchOrders());
+                setSelectedOrder(null)
+              })
+              .catch((err) => {
+                console.error("Update failed:", err);
+              });
+          }}
+        />
+      )}
+      {isAddMode && (
+        <OrderDetailModal
+          order={null}
+          onClose={() => {
+            setIsAddMode(false);
+          }}
+          onSave={(data, isNew) => {
+            if (isNew) {
+              dispatch(postOrderFiles(data)).unwrap()
+                .then(() => {
+                  dispatch(fetchOrders());
+                  setSelectedOrder(null)
+                }).catch((err) => {
+                  console.error("Update failed:", err);
+                });
+            }
           }}
         />
       )}
@@ -157,11 +185,21 @@ function OrderListTable() {
             >
               Download Excel
             </button>
-            <button
+            {/* <button
               onClick={exportToPDF}
               style={{ padding: '8px 16px', background: '#e11d48', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
             >
               Download PDF
+            </button> */}
+
+            <ExportOrdersPdf orders={Orders || []} />
+
+            <button
+              onClick={() => setIsAddMode(true)}
+              className="bg-indigo-600"
+              style={{ padding: '8px 16px', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: "center" }}
+            >
+              + Add Order
             </button>
           </div>
         </div>
@@ -185,12 +223,12 @@ function OrderListTable() {
             contextMenu={true}
             manualColumnResize={true}
             columnSorting={true}
-            fixedColumnsStart={2}
+            fixedColumnsStart={1}
             readOnly={true}
             disableVisualSelection={true}
             // In HotTable props:
             afterOnCellMouseDown={(event, coords) => {
-              if (coords.col === 0 && coords.row >= 1) {   // Only when clicking Order# column
+              if (coords.col === 0 && coords.row >= 0) {   // Only when clicking Order# column
                 handleOrderClick(coords.row);
                 // // Optional: Clear selection after click
                 // if (hotRef.current) {

@@ -20,7 +20,7 @@ const OrderCard = ({ order }) => {
   const orderDate = order.order_date ? new Date(order.order_date).toLocaleDateString() : "N/A";
   const price = order.price ? `$${order.price.toLocaleString()}` : "$0";
   const totalPrice = order.totalPrice ? `$${order.totalPrice.toLocaleString()}` : "$0";
-  const hasDash = order.order_id?.includes("-");
+  const hasDash = String(order?.order_id)?.includes("-");
 
   return (
     <Link

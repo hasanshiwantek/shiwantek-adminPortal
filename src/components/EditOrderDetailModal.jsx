@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
+import { useSelector } from 'react-redux';
 
 const EditOrderDetailModal = ({ order, onClose, onSave }) => {
     const [formData, setFormData] = useState({});
     const [isEditing, setIsEditing] = useState(false);
+    const { pending } = useSelector((state) => state.users);
 
     useEffect(() => {
         if (order) {
@@ -19,7 +21,6 @@ const EditOrderDetailModal = ({ order, onClose, onSave }) => {
     const handleSubmit = (e) => {
         e.preventDefault();
         onSave(formData);
-        setIsEditing(false);
     };
 
     if (!order) return null;
@@ -50,9 +51,8 @@ const EditOrderDetailModal = ({ order, onClose, onSave }) => {
                                     name={key}
                                     value={formData[key] ?? ''}
                                     onChange={handleChange}
-                                    disabled={!isEditing}
                                     className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition-all
-                    ${isEditing ? 'border-indigo-300 bg-white' : 'border-gray-200 bg-gray-50'}`}
+                   border-indigo-300 bg-white`}
                                 />
                             </div>
                         ))}
@@ -63,20 +63,21 @@ const EditOrderDetailModal = ({ order, onClose, onSave }) => {
                 <div className="border-t p-6 flex gap-3 bg-gray-50">
                     <button
                         type="button"
-                        onClick={() => setIsEditing(!isEditing)}
+                        onClick={() => onClose()}
                         className="flex-1 py-3 border border-gray-300 rounded-xl hover:bg-gray-100 font-medium"
                     >
-                        {isEditing ? "Cancel Editing" : "✏️ Edit Order"}
+                        Cancel Editing
                     </button>
 
-                    {isEditing && (
-                        <button
-                            onClick={handleSubmit}
-                            className="flex-1 bg-indigo-600 text-white py-3 rounded-xl font-medium hover:bg-indigo-700"
-                        >
-                            Save Changes
-                        </button>
-                    )}
+
+                    <button
+                        onClick={handleSubmit}
+                        disabled={pending}
+                        className="flex-1 bg-indigo-600 text-white py-3 rounded-xl font-medium hover:bg-indigo-700"
+                    >
+                        {pending ? "Loading..." : "Save Changes"}
+                    </button>
+
                 </div>
             </div>
         </div>

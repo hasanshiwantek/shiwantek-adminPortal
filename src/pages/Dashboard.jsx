@@ -17,7 +17,17 @@ import { OrderCardSkeleton } from "../components/Utils";
 import { toNumber } from "../utils/constant";
 import { useNavigate } from "react-router-dom";
 import OrderDetailModal from "../components/OrderDetailModal";
-
+import OrderListTable from "../components/OrderListTable";
+const tabs = [
+  {
+    label: "Dashboard",
+    value: "dashboard",
+  },
+  {
+    label: "View Sheet",
+    value: "view-sheet",
+  },
+];
 const staticDashboardData = {
   order_value: 235000,
   gross_profit: 42000,
@@ -108,16 +118,15 @@ const staticDashboardData = {
 const Dashboard = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
-  const { users, Orders, userloading, orderloading, error: usersError } = useSelector((state) => state.users);
+  const [activeTab, setActiveTab] = useState("dashboard");
+  const { users, Orders, userloading, orderloading, error: usersError, pending } = useSelector((state) => state.users);
   const { token, user: authUser } = useSelector((state) => state.auth);
-  const [data, setData] = useState(staticDashboardData);
+  const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const ordersPerPage = 10;
-  const [isAddMode, setIsAddMode] = useState(false);
   const [selectedAgent, setSelectedAgent] = useState("All");
   const [selectedProcuredBy, setSelectedProcuredBy] = useState("All");
   const [showDateFilter, setShowDateFilter] = useState(false);
@@ -151,7 +160,6 @@ const Dashboard = () => {
     sales_agent: order["Sales Agent"],
   })) || [];
   const allStatuses = orderData.map(order => order.status);
-  // console.log("All statuses:", allStatuses);
 
 
   const salesAgents = [...new Set(orderData.map(o => o?.sales_agent).filter(Boolean))];
@@ -201,13 +209,12 @@ const Dashboard = () => {
     return <p className="text-center mt-10 text-red-500">Failed to load data.</p>;
 
   // === Filter logic ===
-
   const filteredOrders = orderData.filter(order => {
     const matchStatus =
       selectedFilter === "All" ||
       order.status?.toLowerCase().replace(/\s+/g, "") === selectedFilter.toLowerCase().replace(/\s+/g, "");
 
-    const matchSearch = order.order_id
+    const matchSearch = order?.order_id
       ?.toString()
       .toLowerCase()
       .includes(searchQuery.toLowerCase());
@@ -269,20 +276,7 @@ const Dashboard = () => {
 
   return (
     <>
-      {isAddMode && (
-        <OrderDetailModal
-          order={null}
-          onClose={() => {
-            setIsAddMode(false);
-          }}
-          onSave={(data, isNew) => {
-            if (isNew) {
-              // Dispatch create new order
-              console.log("Create new order:", data);
-            }
-          }}
-        />
-      )}
+
       {/* ==== Stats Cards ==== */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
         {[
@@ -294,239 +288,244 @@ const Dashboard = () => {
           <StatsCard key={i} {...stat} />
         ))}
       </div>
-      <div style={{ display: 'flex', gap: '12px' }}>
+
+      <div className="flex border-b mb-2">
         <button
-          onClick={() => navigate("/sheet")}
-          className="bg-indigo-600"
-          style={{ padding: '8px 16px', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', marginBottom: "5px" }}
+          onClick={() => setActiveTab("dashboard")}
+          className={`px-4 py-2 ${activeTab === "dashboard"
+            ? "border-b-2 border-blue-600 font-semibold"
+            : "text-gray-500"
+            }`}
         >
-          Veiw sheet
+          Dashboard
         </button>
+
         <button
-          onClick={() => setIsAddMode(true)}
-          className="bg-indigo-600"
-          style={{ padding: '8px 16px', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', marginBottom: "5px" }}
+          onClick={() => setActiveTab("view-sheet")}
+          className={`px-4 py-2 ${activeTab === "view-sheet"
+            ? "border-b-2 border-blue-600 font-semibold"
+            : "text-gray-500"
+            }`}
         >
-          + Add Order
+          View Sheet
         </button>
-      </div >
+      </div>
+      {activeTab === "dashboard" ? <>
+        {/* ==== Orders Section ==== */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8" >
+          {/* === Orders List === */}
+          {/* <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-6"> */}
+          <div className={`${[1, 2].includes(roleId) ? "lg:col-span-2" : "lg:col-span-3"} bg-white rounded-2xl shadow-sm border border-gray-100 p-6`}>
 
-      {/* ==== Orders Section ==== */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8" >
-        {/* === Orders List === */}
-        {/* <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-6"> */}
-        <div className={`${[1, 2].includes(roleId) ? "lg:col-span-2" : "lg:col-span-3"} bg-white rounded-2xl shadow-sm border border-gray-100 p-6`}>
-
-          <div className="mb-4">
-            <h2 className="font-semibold text-gray-800 text-lg">Orders</h2>
-          </div>
-
-          {/* Filters */}
-          <div className="flex flex-wrap gap-2 mb-4 w-full">
-            {["All", "Delivered", "Intransit"].map(
-              (filter) => (
-                <button
-                  key={filter}
-                  className={`px-4 py-2 rounded-full text-sm font-medium ${selectedFilter === filter
-                    ? "bg-indigo-600 text-white"
-                    : "bg-white text-gray-700 border hover:bg-gray-100"
-                    }`}
-                  onClick={() => {
-                    setSelectedFilter(filter);
-                    setCurrentPage(1);
-                  }}
-                >
-                  {filter}
-                </button>
-              )
-            )}
-            {/* Sales Agent Dropdown */}
-            <select
-              value={selectedAgent}
-              onChange={(e) => {
-                setSelectedAgent(e.target.value);
-                setCurrentPage(1);
-                setSelectedProcuredBy("All");
-              }}
-              className="px-4 py-2 rounded-full text-sm font-medium bg-white text-gray-700 border shadow-sm hover:bg-gray-100 outline-none cursor-pointer"
-            >
-              <option value="All">All Agents</option>
-              {salesAgents.map((agent) => (
-                <option key={agent} value={agent}>{agent}</option>
-              ))}
-            </select>
-
-            {/* Procured By Dropdown */}
-            <select
-              value={selectedProcuredBy}
-              onChange={(e) => {
-                setSelectedProcuredBy(e.target.value);
-                setSelectedAgent("All");
-                setCurrentPage(1);
-              }}
-              className="px-4 py-2 rounded-full text-sm font-medium bg-white text-gray-700 border shadow-sm hover:bg-gray-100 outline-none cursor-pointer"
-            >
-              <option value="All">All Procured By</option>
-              {procuredByList.map((name) => (
-                <option key={name} value={name}>{name}</option>
-              ))}
-            </select>
-
-            <button
-              onClick={() => setShowDateFilter(true)}
-              className="flex items-center gap-2 bg-white border px-4 py-2 rounded-full text-sm text-gray-700 shadow-sm hover:bg-gray-100"
-            >
-              <Filter size={16} /> Filter by date
-            </button>
-            <button
-              onClick={() => {
-                setShowDateFilter(false);
-                setStartDate(null);
-                setEndDate(null);
-                setSearchQuery("");
-                setSelectedFilter("All");
-                setSelectedAgent("All");
-                setSelectedProcuredBy("All");
-                setCurrentPage(1);
-              }}
-              className="flex items-center gap-2 bg-white border px-4 py-2 rounded-full text-sm text-gray-700 shadow-sm hover:bg-gray-100"
-            >
-              Reset
-            </button>
-          </div>
-
-          <div className="mb-6">
-            <div className="flex items-center gap-2 border rounded-full px-4 py-2 bg-white shadow-sm w-full">
-              <input
-                type="text"
-                placeholder="Enter Order ID..."
-                className="outline-none text-sm text-gray-700 flex-1"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-              <Search size={16} className="text-gray-400" />
+            <div className="mb-4">
+              <h2 className="font-semibold text-gray-800 text-lg">Orders</h2>
             </div>
-          </div>
 
-          {/* Orders Grid */}
-          {/* ==== Orders Grid (2 cards per row clean layout) ==== */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {orderloading ? (
-              Array.from({ length: 4 }).map((_, i) => <OrderCardSkeleton key={i} />)
-            ) : hasAccess(selectedFilter) ? (
-              currentOrders.length > 0 ? (
-                currentOrders.map(order => <OrderCard key={order.order_id} order={order} />)
-              ) : (
-                <p className="col-span-full text-center text-gray-500">
-                  No orders found for this filter.
-                </p>
-              )
-            ) : (
-              <div className="col-span-full flex justify-center items-center h-40">
-                <NotAllowed />
+            {/* Filters */}
+            <div className="flex flex-wrap gap-2 mb-4 w-full">
+              {["All", "Delivered", "Intransit"].map(
+                (filter) => (
+                  <button
+                    key={filter}
+                    className={`px-4 py-2 rounded-full text-sm font-medium ${selectedFilter === filter
+                      ? "bg-indigo-600 text-white"
+                      : "bg-white text-gray-700 border hover:bg-gray-100"
+                      }`}
+                    onClick={() => {
+                      setSelectedFilter(filter);
+                      setCurrentPage(1);
+                    }}
+                  >
+                    {filter}
+                  </button>
+                )
+              )}
+              {/* Sales Agent Dropdown */}
+              <select
+                value={selectedAgent}
+                onChange={(e) => {
+                  setSelectedAgent(e.target.value);
+                  setCurrentPage(1);
+                  setSelectedProcuredBy("All");
+                }}
+                className="px-4 py-2 rounded-full text-sm font-medium bg-white text-gray-700 border shadow-sm hover:bg-gray-100 outline-none cursor-pointer"
+              >
+                <option value="All">All Agents</option>
+                {salesAgents.map((agent) => (
+                  <option key={agent} value={agent}>{agent}</option>
+                ))}
+              </select>
+
+              {/* Procured By Dropdown */}
+              <select
+                value={selectedProcuredBy}
+                onChange={(e) => {
+                  setSelectedProcuredBy(e.target.value);
+                  setSelectedAgent("All");
+                  setCurrentPage(1);
+                }}
+                className="px-4 py-2 rounded-full text-sm font-medium bg-white text-gray-700 border shadow-sm hover:bg-gray-100 outline-none cursor-pointer"
+              >
+                <option value="All">All Procured By</option>
+                {procuredByList.map((name) => (
+                  <option key={name} value={name}>{name}</option>
+                ))}
+              </select>
+
+              <button
+                onClick={() => setShowDateFilter(true)}
+                className="flex items-center gap-2 bg-white border px-4 py-2 rounded-full text-sm text-gray-700 shadow-sm hover:bg-gray-100"
+              >
+                <Filter size={16} /> Filter by date
+              </button>
+              <button
+                onClick={() => {
+                  setShowDateFilter(false);
+                  setStartDate(null);
+                  setEndDate(null);
+                  setSearchQuery("");
+                  setSelectedFilter("All");
+                  setSelectedAgent("All");
+                  setSelectedProcuredBy("All");
+                  setCurrentPage(1);
+                }}
+                className="flex items-center gap-2 bg-white border px-4 py-2 rounded-full text-sm text-gray-700 shadow-sm hover:bg-gray-100"
+              >
+                Reset
+              </button>
+            </div>
+
+            <div className="mb-6">
+              <div className="flex items-center gap-2 border rounded-full px-4 py-2 bg-white shadow-sm w-full">
+                <input
+                  type="text"
+                  placeholder="Enter Order ID..."
+                  className="outline-none text-sm text-gray-700 flex-1"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+                <Search size={16} className="text-gray-400" />
               </div>
-            )}
-          </div>
+            </div>
+
+            {/* Orders Grid */}
+            {/* ==== Orders Grid (2 cards per row clean layout) ==== */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {orderloading ? (
+                Array.from({ length: 4 }).map((_, i) => <OrderCardSkeleton key={i} />)
+              ) : hasAccess(selectedFilter) ? (
+                currentOrders.length > 0 ? (
+                  currentOrders.map(order => <OrderCard key={order.order_id} order={order} />)
+                ) : (
+                  <p className="col-span-full text-center text-gray-500">
+                    No orders found for this filter.
+                  </p>
+                )
+              ) : (
+                <div className="col-span-full flex justify-center items-center h-40">
+                  <NotAllowed />
+                </div>
+              )}
+            </div>
 
 
 
 
-          {/* Pagination */}
-          <Pagination
-            totalPages={totalPages}
-            currentPage={currentPage}
-            onPageChange={setCurrentPage}
-          />
-        </div>
-
-        {/* === Users Section === */}
-        {
-          [1, 2].includes(roleId) && <div>
-            <UsersSection
-              users={filteredUsers}
-              searchValue={userSearch}
-              onSearchChange={setUserSearch}
-              onCreateUserClick={toggleUserModal}
-              loading={userloading || (!hasFetchedUsers && token)}
-              error={usersError}
+            {/* Pagination */}
+            <Pagination
+              totalPages={totalPages}
+              currentPage={currentPage}
+              onPageChange={setCurrentPage}
             />
           </div>
-        }
-      </div>
 
-      {/* ==== Date Filter Modal ==== */}
-      {
-        showDateFilter && (
-          <div className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex justify-center items-center z-50">
-            <div className="bg-white w-full max-w-sm rounded-2xl p-6 shadow-lg relative">
-              <button
-                onClick={() => setShowDateFilter(false)}
-                className="absolute right-4 top-4 text-gray-400 hover:text-gray-600"
-              >
-                <X size={20} />
-              </button>
+          {/* === Users Section === */}
+          {
+            [1, 2].includes(roleId) && <div>
+              <UsersSection
+                users={filteredUsers}
+                searchValue={userSearch}
+                onSearchChange={setUserSearch}
+                onCreateUserClick={toggleUserModal}
+                loading={userloading || (!hasFetchedUsers && token)}
+                error={usersError}
+              />
+            </div>
+          }
+        </div>
 
-              <h2 className="text-lg font-semibold text-gray-800 mb-3">
-                Select Date Range
-              </h2>
-              <div className="flex flex-col gap-4">
-                <div>
-                  <label className="text-sm text-gray-600 font-medium">
-                    Start Date
-                  </label>
-                  <DatePicker
-                    selected={startDate}
-                    onChange={(date) => setStartDate(date)}
-                    selectsStart
-                    startDate={startDate}
-                    endDate={endDate}
-                    dateFormat="MM/dd/yyyy"
-                    className="w-full mt-1 p-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500"
-                    placeholderText="Select start date"
-                  />
-                </div>
+        {
+          showDateFilter && (
+            <div className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex justify-center items-center z-50">
+              <div className="bg-white w-full max-w-sm rounded-2xl p-6 shadow-lg relative">
+                <button
+                  onClick={() => setShowDateFilter(false)}
+                  className="absolute right-4 top-4 text-gray-400 hover:text-gray-600"
+                >
+                  <X size={20} />
+                </button>
 
-                <div>
-                  <label className="text-sm text-gray-600 font-medium">
-                    End Date
-                  </label>
-                  <DatePicker
-                    selected={endDate}
-                    onChange={(date) => setEndDate(date)}
-                    selectsEnd
-                    startDate={startDate}
-                    endDate={endDate}
-                    minDate={startDate}
-                    dateFormat="MM/dd/yyyy"
-                    className="w-full mt-1 p-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500"
-                    placeholderText="Select end date"
-                  />
-                </div>
+                <h2 className="text-lg font-semibold text-gray-800 mb-3">
+                  Select Date Range
+                </h2>
+                <div className="flex flex-col gap-4">
+                  <div>
+                    <label className="text-sm text-gray-600 font-medium">
+                      Start Date
+                    </label>
+                    <DatePicker
+                      selected={startDate}
+                      onChange={(date) => setStartDate(date)}
+                      selectsStart
+                      startDate={startDate}
+                      endDate={endDate}
+                      dateFormat="MM/dd/yyyy"
+                      className="w-full mt-1 p-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500"
+                      placeholderText="Select start date"
+                    />
+                  </div>
 
-                <div className="flex justify-between gap-3 mt-4">
-                  <button
-                    onClick={() => {
-                      setStartDate(null);
-                      setEndDate(null);
-                      setShowDateFilter(false);
-                    }}
-                    className="w-1/2 border py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-100"
-                  >
-                    Close
-                  </button>
-                  <button
-                    onClick={() => setShowDateFilter(false)}
-                    className="w-1/2 bg-indigo-600 text-white py-2 rounded-lg text-sm hover:bg-indigo-700"
-                  >
-                    Continue
-                  </button>
+                  <div>
+                    <label className="text-sm text-gray-600 font-medium">
+                      End Date
+                    </label>
+                    <DatePicker
+                      selected={endDate}
+                      onChange={(date) => setEndDate(date)}
+                      selectsEnd
+                      startDate={startDate}
+                      endDate={endDate}
+                      minDate={startDate}
+                      dateFormat="MM/dd/yyyy"
+                      className="w-full mt-1 p-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500"
+                      placeholderText="Select end date"
+                    />
+                  </div>
+
+                  <div className="flex justify-between gap-3 mt-4">
+                    <button
+                      onClick={() => {
+                        setStartDate(null);
+                        setEndDate(null);
+                        setShowDateFilter(false);
+                      }}
+                      className="w-1/2 border py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-100"
+                    >
+                      Close
+                    </button>
+                    <button
+                      onClick={() => setShowDateFilter(false)}
+                      className="w-1/2 bg-indigo-600 text-white py-2 rounded-lg text-sm hover:bg-indigo-700"
+                    >
+                      Continue
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        )
-      }
-
+          )
+        }
+      </> : <OrderListTable />}
       {/* {showUserModal && <CreateUserModal onClose={() => setShowUserModal(false)} />} */}
     </>
   );

@@ -3,7 +3,8 @@ import axios from "axios";
 import { toast } from "react-toastify";
 
 const axiosInstance = axios.create({
- baseURL: "https://operations.advertsedge.com/api",
+ baseURL: "https://optest.advertsedge.com/api",
+//  baseURL: "https://operations.advertsedge.com/api",
 });
 
 axiosInstance.interceptors.request.use((config) => {

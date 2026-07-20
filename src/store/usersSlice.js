@@ -13,6 +13,7 @@ const initialState = {
   fetchLoading: false,
   deleteLoading: false,
   error: null,
+  pending: false
 };
 
 // Fetch users async thunk
@@ -44,6 +45,20 @@ export const deleteUser = createAsyncThunk(
   }
 );
 
+// Order Files
+export const postOrderFiles = createAsyncThunk(
+  "orderFiles/postOrderFiles",
+  async (payload, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.post(`order-files`, payload);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || error.message || "Failed to post order files");
+    }
+  }
+);
+
+
 // UPDATE user by ID
 export const updateUser = createAsyncThunk(
   "users/updateUser",
@@ -57,8 +72,26 @@ export const updateUser = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(
         error.response?.data?.message ||
-          error.message ||
-          "Failed to update user"
+        error.message ||
+        "Failed to update user"
+      );
+    }
+  }
+);
+export const updateOrderFiles = createAsyncThunk(
+  "users/updateOrderFiles",
+  async ({ id, data }, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.put(
+        `order-files/${id}`,
+        data
+      );
+      return response.data; // updated user return karo
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to update user"
       );
     }
   }
@@ -69,7 +102,7 @@ export const fetchOrders = createAsyncThunk(
   'users/fetchOrders',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.get('/my-sheet-data');
+      const response = await axiosInstance.get('/order-files');
       return response.data;
     } catch (error) {
       return rejectWithValue(
@@ -84,7 +117,7 @@ export const fetchOrdersAdmin = createAsyncThunk(
   "users/fetchOrdersAdmin",
   async (storeId, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.get(`/my-sheet-data?sheet_id=${storeId}`);
+      const response = await axiosInstance.get(`/order-files?sheet_id=${storeId}`);
       return response.data; // single order object
     } catch (error) {
       return rejectWithValue(
@@ -98,7 +131,8 @@ export const fetchSingleOrder = createAsyncThunk(
   "users/fetchSingleOrder",
   async (orderId, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.get(`/my-sheet-order?order_id=${orderId}`);
+      const response = await axiosInstance.get(`/order-files/${orderId}`);
+      // const response = await axiosInstance.get(`/my-sheet-order?order_id=${orderId}`);
       return response.data; // single order object
     } catch (error) {
       return rejectWithValue(
@@ -114,7 +148,8 @@ export const fetchSingleOrderAdmin = createAsyncThunk(
   async ({ orderId, sheetId }, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.get(
-        `/my-sheet-order?order_id=${orderId}&sheet_id=${sheetId}`
+        `/order-files/${orderId}`
+        // `/my-sheet-order?order_id=${orderId}&sheet_id=${sheetId}`
       );
       return response.data; // single order object
     } catch (error) {
@@ -227,43 +262,70 @@ const usersSlice = createSlice({
         state.error = action.payload;
         state.users = [];
       })
-          // DELETE USER - PENDING
-    .addCase(deleteUser.pending, (state) => {
-      state.deleteLoading = true;
-      state.error = null;
-    })
+      // DELETE USER - PENDING
+      .addCase(deleteUser.pending, (state) => {
+        state.deleteLoading = true;
+        state.error = null;
+      })
 
-    // DELETE USER - FULFILLED
-    .addCase(deleteUser.fulfilled, (state, action) => {
-      state.deleteLoading = false;
-      // remove deleted user from list
-      state.users = state.users.filter(
-        (user) => user.id !== action.payload
-      );
-    })
-    .addCase(updateUser.pending, (state) => {
-      state.updateLoading = true;
-      state.error = null;
-    })
-    .addCase(updateUser.fulfilled, (state, action) => {
-      state.updateLoading = false;
-      const updated = action.payload?.data;
-      if (updated) {
-        state.users = state.users.map((user) =>
-          user.id === updated.id ? updated : user
+      // DELETE USER - FULFILLED
+      .addCase(deleteUser.fulfilled, (state, action) => {
+        state.deleteLoading = false;
+        // remove deleted user from list
+        state.users = state.users.filter(
+          (user) => user.id !== action.payload
         );
-      }
-    })
-    .addCase(updateUser.rejected, (state, action) => {
-      state.updateLoading = false;
-      state.error = action.payload;
-    })
+      })
+      .addCase(updateUser.pending, (state) => {
+        state.updateLoading = true;
+        state.error = null;
+      })
+      .addCase(updateUser.fulfilled, (state, action) => {
+        state.updateLoading = false;
+        const updated = action.payload?.data;
+        if (updated) {
+          state.users = state.users.map((user) =>
+            user.id === updated.id ? updated : user
+          );
+        }
+      })
+      .addCase(updateUser.rejected, (state, action) => {
+        state.updateLoading = false;
+        state.error = action.payload;
+      })
 
-    // DELETE USER - REJECTED
-    .addCase(deleteUser.rejected, (state, action) => {
-      state.deleteLoading = false;
-      state.error = action.payload;
-    })
+
+
+      // updateOrderFiles
+      .addCase(updateOrderFiles.pending, (state) => {
+        state.pending = true;
+        state.error = null;
+      })
+      .addCase(updateOrderFiles.fulfilled, (state, action) => {
+        state.pending = false;
+      })
+      .addCase(updateOrderFiles.rejected, (state, action) => {
+        state.pending = false;
+        state.error = action.payload;
+      })
+
+      .addCase(postOrderFiles.pending, (state) => {
+        state.pending = true;
+        state.error = null;
+      })
+      .addCase(postOrderFiles.fulfilled, (state, action) => {
+        state.pending = false;
+      })
+      .addCase(postOrderFiles.rejected, (state, action) => {
+        state.pending = false;
+        state.error = action.payload;
+      })
+
+      // DELETE USER - REJECTED
+      .addCase(deleteUser.rejected, (state, action) => {
+        state.deleteLoading = false;
+        state.error = action.payload;
+      })
       .addCase(fetchOrders.pending, (state) => {
         state.orderloading = true;
         state.error = null;
@@ -305,37 +367,37 @@ const usersSlice = createSlice({
       })
       .addCase(fetchSingleOrderAdmin.rejected, (state, action) => { state.orderloading = false; state.error = action.payload; })
       .addCase(fetchSheets.pending, (state) => { state.fetchLoading = true; state.error = null; })
-    .addCase(fetchSheets.fulfilled, (state, action) => { state.fetchLoading = false; state.sheets = action.payload; })
-    .addCase(fetchSheets.rejected, (state, action) => { state.fetchLoading = false; state.error = action.payload; })
+      .addCase(fetchSheets.fulfilled, (state, action) => { state.fetchLoading = false; state.sheets = action.payload; })
+      .addCase(fetchSheets.rejected, (state, action) => { state.fetchLoading = false; state.error = action.payload; })
 
-    // CREATE
-    .addCase(createSheetStore.pending, (state) => { state.createLoading = true; state.error = null; })
-    .addCase(createSheetStore.fulfilled, (state, action) => { state.createLoading = false; state.sheets.push(action.payload); })
-    .addCase(createSheetStore.rejected, (state, action) => { state.createLoading = false; state.error = action.payload; })
+      // CREATE
+      .addCase(createSheetStore.pending, (state) => { state.createLoading = true; state.error = null; })
+      .addCase(createSheetStore.fulfilled, (state, action) => { state.createLoading = false; state.sheets.push(action.payload); })
+      .addCase(createSheetStore.rejected, (state, action) => { state.createLoading = false; state.error = action.payload; })
 
-    // UPDATE
-    .addCase(updateSheet.pending, (state) => { state.updateLoading = true; state.error = null; })
-   .addCase(updateSheet.fulfilled, (state, action) => {
-  state.updateLoading = false;
-  // Backend se updated sheet object milega
-  const updatedSheet = action.payload.data || action.payload;
-  const index = state.sheets.data.findIndex(s => s.id === updatedSheet.id);
-  if (index !== -1) {
-    state.sheets.data[index] = updatedSheet;
-  }
-  state.error = null; // ✅ error clear karo
-})
-    .addCase(updateSheet.rejected, (state, action) => { state.updateLoading = false; state.error = action.payload; })
+      // UPDATE
+      .addCase(updateSheet.pending, (state) => { state.updateLoading = true; state.error = null; })
+      .addCase(updateSheet.fulfilled, (state, action) => {
+        state.updateLoading = false;
+        // Backend se updated sheet object milega
+        const updatedSheet = action.payload.data || action.payload;
+        const index = state.sheets.data.findIndex(s => s.id === updatedSheet.id);
+        if (index !== -1) {
+          state.sheets.data[index] = updatedSheet;
+        }
+        state.error = null; // ✅ error clear karo
+      })
+      .addCase(updateSheet.rejected, (state, action) => { state.updateLoading = false; state.error = action.payload; })
 
-    // DELETE
-    .addCase(deleteSheet.pending, (state) => { state.deleteLoading = true; state.error = null; })
-   .addCase(deleteSheet.fulfilled, (state, action) => {
-  state.deleteLoading = false;
-  const deletedId = action.payload; // ID aayegi
-  state.sheets.data = state.sheets.data.filter(sheet => sheet.id !== deletedId);
-  state.error = null; // ✅ error clear karo
-})
-    .addCase(deleteSheet.rejected, (state, action) => { state.deleteLoading = false; state.error = action.payload; });
+      // DELETE
+      .addCase(deleteSheet.pending, (state) => { state.deleteLoading = true; state.error = null; })
+      .addCase(deleteSheet.fulfilled, (state, action) => {
+        state.deleteLoading = false;
+        const deletedId = action.payload; // ID aayegi
+        state.sheets.data = state.sheets.data.filter(sheet => sheet.id !== deletedId);
+        state.error = null; // ✅ error clear karo
+      })
+      .addCase(deleteSheet.rejected, (state, action) => { state.deleteLoading = false; state.error = action.payload; });
   },
 });
 
